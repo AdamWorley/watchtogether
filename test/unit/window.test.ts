@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { episodeWindow, liveEpisode, nextEpisode, type Episode } from '../../src/shared/window';
+import {
+  demoEpisode,
+  episodeWindow,
+  EpisodeSchema,
+  liveEpisode,
+  nextEpisode,
+  type Episode,
+} from '../../src/shared/window';
 
 const ep = (id: number, airstamp: string, runtime: number | null = 60): Episode => ({
   id,
@@ -66,5 +73,22 @@ describe('liveEpisode / nextEpisode', () => {
       expect(liveEpisode(list, at('2026-10-08T20:10:00Z'))?.id).toBe(1);
       expect(nextEpisode(list, at('2026-10-08T12:00:00Z'))?.id).toBe(1);
     }
+  });
+});
+
+describe('demoEpisode (Previews only)', () => {
+  it('is live at every minute of the hour, and stays stable within the hour', () => {
+    const base = Date.parse('2026-10-05T19:00:00Z');
+    for (let m = 0; m < 60; m++) {
+      const now = base + m * 60_000;
+      const demo = demoEpisode(now);
+      expect(liveEpisode([demo], now)).toEqual(demo);
+      expect(demo.id).toBe(demoEpisode(base).id);
+    }
+    expect(demoEpisode(base + 3600_000).id).not.toBe(demoEpisode(base).id);
+  });
+
+  it('passes the episode schema', () => {
+    expect(EpisodeSchema.safeParse(demoEpisode(Date.now())).success).toBe(true);
   });
 });

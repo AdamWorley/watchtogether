@@ -64,3 +64,22 @@ export function nextEpisode(episodes: readonly Episode[], now: number): Episode 
   const firstAt = Date.parse(first.airstamp);
   return upcoming.filter((ep) => Date.parse(ep.airstamp) === firstAt).at(-1);
 }
+
+const HOUR_MS = 3600_000;
+
+/**
+ * Preview deployments only: a fake episode that is always live, so rooms can be tested at any time.
+ * It airs on the hour and runs 60 minutes, so its window (30 min before to 60 min after) always covers now.
+ * A room opened from it closes at most two hours later.
+ */
+export function demoEpisode(now: number): Episode {
+  const hour = Math.floor(now / HOUR_MS);
+  return {
+    id: -1_000_000 - hour,
+    name: 'Preview test episode',
+    season: 0,
+    number: null,
+    airstamp: new Date(hour * HOUR_MS).toISOString(),
+    runtime: 60,
+  };
+}

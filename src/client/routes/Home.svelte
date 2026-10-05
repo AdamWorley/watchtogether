@@ -88,8 +88,13 @@
         <p class="tagline">{voice.tagline}</p>
         {#if d.kind === 'live'}
           <p class="when">
-            {d.premiere ? 'Series premiere' : `Series ${d.episode.season}, episode ${d.episode.number ?? ''}`} ·
-            rooms open until {formatTime(episodeWindow(d.episode).closesAt)}
+            {d.premiere
+              ? 'Series premiere'
+              : d.episode.number === null
+                ? 'Special'
+                : `Series ${d.episode.season}, episode ${d.episode.number}`} · rooms open until {formatTime(
+              episodeWindow(d.episode).closesAt,
+            )}
           </p>
         {/if}
         <span class="enter">{voice.enter}</span>

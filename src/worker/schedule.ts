@@ -1,7 +1,7 @@
 import { z } from '../shared/zod';
 import { applyOverrides, SCHEDULE_OVERRIDES, type ScheduleOverride } from '../shared/schedule-overrides';
 import { SHOW_SLUGS, SHOWS, type ShowSlug } from '../shared/shows';
-import { EpisodeSchema, type Episode } from '../shared/window';
+import { demoEpisode, EpisodeSchema, type Episode } from '../shared/window';
 import { log, readCapped } from './http';
 
 const TVMAZE = 'https://api.tvmaze.com';
@@ -80,6 +80,7 @@ export async function readSchedule(env: Env, show: ShowSlug): Promise<StoredSche
 /**
  * KV first; fetch from TVmaze if missing, refresh in the background if stale.
  * Overrides from schedule-overrides.ts are applied here, so they take effect as soon as they're deployed.
+ * On Previews (DEMO_EPISODES=on) an always-live test episode is added.
  */
 export async function getSchedule(
   env: Env,
@@ -93,7 +94,10 @@ export async function getSchedule(
   } else if (Date.now() - stored.updatedAt > STALE_AFTER_MS) {
     ctx.waitUntil(refreshSchedule(env, show).catch(() => log('schedule.refresh_failed', { show })));
   }
-  return { ...stored, episodes: applyOverrides(stored.episodes, overrides) };
+  const episodes = applyOverrides(stored.episodes, overrides);
+  // Set only in the `previews` block of wrangler.jsonc; production is always "off".
+  if (env.DEMO_EPISODES === 'on') episodes.push(demoEpisode(Date.now()));
+  return { ...stored, episodes };
 }
 
 export async function refreshAll(env: Env): Promise<void> {

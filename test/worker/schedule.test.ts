@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import { createExecutionContext, waitOnExecutionContext } from 'cloudflare:test';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getSchedule, parseTvmaze, readSchedule, refreshSchedule } from '../../src/worker/schedule';
+import { liveEpisode } from '../../src/shared/window';
 
 const now = Date.parse('2026-10-05T12:00:00Z');
 const raw = (over: Record<string, unknown>) => ({
@@ -119,5 +120,17 @@ describe('getSchedule', () => {
     await waitOnExecutionContext(ctx);
     expect(spy).toHaveBeenCalledOnce();
     expect((await readSchedule(env, 'traitors'))?.updatedAt).toBeGreaterThan(old);
+  });
+
+  it('adds the always-live test episode only when DEMO_EPISODES is on', async () => {
+    await env.KV.put('schedule:traitors', JSON.stringify({ episodes: [stored], updatedAt: Date.now() }));
+    const ctx = createExecutionContext();
+    expect(env.DEMO_EPISODES).toBe('off'); // the production value from wrangler.jsonc
+    const prod = await getSchedule(env, ctx, 'traitors');
+    const preview = await getSchedule({ ...env, DEMO_EPISODES: 'on' }, ctx, 'traitors');
+    await waitOnExecutionContext(ctx);
+    expect(prod.episodes.map((e) => e.id)).toEqual([7]);
+    expect(preview.episodes).toHaveLength(2);
+    expect(liveEpisode(preview.episodes, Date.now())?.name).toBe('Preview test episode');
   });
 });

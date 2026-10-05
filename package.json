@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "npm run build && vite preview",
-    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts",
+    "cf-typegen": "wrangler types --strict-vars=false src/worker/worker-configuration.d.ts",
     "check": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings && tsc -p src/worker && tsc -p test/worker && tsc -p test/unit && tsc -p test/e2e && tsc -p scripts",
     "lint": "eslint . --max-warnings 0 && prettier --check . && node scripts/check-unicode.mjs",
     "format": "prettier --write .",

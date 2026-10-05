@@ -100,7 +100,8 @@ GitHub Actions does everything:
 There is no staging environment: the PR Preview is where you check a change before merging. Each Preview gets
 its own Durable Object storage, so rooms opened there never mix with production. All Previews share one
 preview-only KV namespace (TVmaze cache and room codes). Previews don't run the cron; they fetch the schedule
-from TVmaze on first request, so a room can only be opened on a Preview while a show is actually on air.
+from TVmaze on first request. Every show on a Preview also has an always-live "Preview test episode"
+(`DEMO_EPISODES=on` in the `previews` block), so rooms can be tested at any time. Production has it `off`.
 PRs from forks and Dependabot get no Preview, because they don't receive secrets.
 
 ### One-time setup

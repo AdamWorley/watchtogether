@@ -5,9 +5,12 @@
 
 const STEPS = ['fit-1', 'fit-2', 'fit-3'] as const;
 
-/** Words the browser may legitimately break: soft hyphen, real hyphen, or a long lowercase word. */
-function breakable(word: string): boolean {
-  if (word.includes('\u00AD') || word.includes('-')) return true;
+/**
+ * Words the browser may legitimately break: real hyphen, a long lowercase word, or (unless `strict`) a soft
+ * hyphen. Strict mode prefers shrinking the type over breaking at a soft hyphen.
+ */
+function breakable(word: string, strict = false): boolean {
+  if (word.includes('-') || (!strict && word.includes('\u00AD'))) return true;
   const core = word.replace(/^[^A-Za-z]+|[^A-Za-z]+$/g, '');
   return /^[a-z]/.test(core) && core.replace(/[^a-z]/gi, '').length >= 9;
 }
@@ -24,13 +27,13 @@ function frame(cell: HTMLElement): { left: number; right: number } {
  * Measure the real layout (not a canvas estimate, which can resolve fonts like system-ui differently):
  * true if any unbreakable word wraps across lines or pokes outside the frame.
  */
-function misfits(node: HTMLElement, cell: HTMLElement): boolean {
+function misfits(node: HTMLElement, cell: HTMLElement, strict: boolean): boolean {
   const { left, right } = frame(cell);
   const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
   const range = document.createRange();
   for (let text = walker.nextNode(); text; text = walker.nextNode()) {
     for (const m of (text.textContent ?? '').matchAll(/\S+/g)) {
-      if (breakable(m[0])) continue;
+      if (breakable(m[0], strict)) continue;
       range.setStart(text, m.index);
       range.setEnd(text, m.index + m[0].length);
       const rects = [...range.getClientRects()].filter((r) => r.width > 0);
@@ -44,11 +47,16 @@ function misfits(node: HTMLElement, cell: HTMLElement): boolean {
 function fit(node: HTMLElement): void {
   const cell = node.closest<HTMLElement>('.cell');
   if (!cell || cell.clientWidth === 0) return;
-  node.classList.remove(...STEPS);
-  for (const step of STEPS) {
-    if (!misfits(node, cell)) return;
+  // First try to keep soft-hyphenated words whole by shrinking; on very wide fonts, fall back to letting
+  // them break at their soft hyphen.
+  for (const strict of [true, false]) {
     node.classList.remove(...STEPS);
-    node.classList.add(step);
+    if (!misfits(node, cell, strict)) return;
+    for (const step of STEPS) {
+      node.classList.remove(...STEPS);
+      node.classList.add(step);
+      if (!misfits(node, cell, strict)) return;
+    }
   }
 }
 

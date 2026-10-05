@@ -5,6 +5,7 @@ import {
   FREE,
   FREE_CELL,
   generateCard,
+  bestLine,
   hasLine,
   isFullHouse,
   isValidClaim,
@@ -93,5 +94,14 @@ describe('win detection', () => {
     expect(isValidClaim('house', all)).toBe(true);
     expect(isFullHouse(all.slice(1))).toBe(false);
     expect(isValidClaim('house', [0, 1, 2, 3, 4])).toBe(false);
+  });
+});
+
+describe('bestLine', () => {
+  it('counts the most marked cells in any line, with the free centre', () => {
+    expect(bestLine([])).toBe(1);
+    expect(bestLine([0, 1])).toBe(2);
+    expect(bestLine([10, 11, 13])).toBe(4);
+    expect(bestLine([0, 1, 2, 3, 4])).toBe(5);
   });
 });

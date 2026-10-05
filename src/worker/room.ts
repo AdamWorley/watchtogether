@@ -1,5 +1,5 @@
 import { DurableObject } from 'cloudflare:workers';
-import { cardKey, generateCard, isValidClaim, type ClaimKind } from '../shared/bingo';
+import { bestLine, cardKey, generateCard, isValidClaim, type ClaimKind } from '../shared/bingo';
 import { generateCode, generateToken, TOKEN_RE } from '../shared/codes';
 import { SQUARES } from '../shared/content';
 import {
@@ -415,8 +415,9 @@ export class Room extends DurableObject<Env> {
     else marks.delete(cell);
     const list = [...marks].sort((a, b) => a - b);
     this.sql.exec('UPDATE members SET marks = ? WHERE id = ?', JSON.stringify(list), member.id);
-    // Echo to every tab this member has open.
+    // Echo to every tab this member has open; everyone else only learns the new counts.
     for (const sock of this.ctx.getWebSockets(member.id)) this.send(sock, { t: 'marks', marks: list });
+    this.broadcastMembers();
   }
 
   private onClaim(ws: WebSocket, member: MemberRow, kind: ClaimKind): void {
@@ -521,14 +522,16 @@ export class Room extends DurableObject<Env> {
 
   private members(exclude?: WebSocket): Member[] {
     return this.sql
-      .exec<{ id: string; name: string; host: number }>(
-        'SELECT id, name, host FROM members WHERE banned = 0 ORDER BY joined_at',
+      .exec<{ id: string; name: string; host: number; marks: string }>(
+        'SELECT id, name, host, marks FROM members WHERE banned = 0 ORDER BY joined_at',
       )
       .toArray()
       .map((m) => ({
         id: m.id,
         name: m.name,
         host: m.host === 1,
+        marked: (JSON.parse(m.marks) as number[]).length,
+        best: bestLine(JSON.parse(m.marks) as number[]),
         online: this.ctx.getWebSockets(m.id).some((ws) => ws !== exclude && ws.readyState === WebSocket.OPEN),
       }));
   }

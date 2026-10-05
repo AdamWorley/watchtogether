@@ -10,6 +10,7 @@
   import { RoomConnection } from '../lib/room.svelte';
   import { router } from '../lib/router.svelte';
   import { clearSession, loadSession, saveSession, type Session } from '../lib/session';
+  import { keepsakeFrom, saveKeepsake } from '../lib/keepsake';
   import { VOICES } from '../lib/voice';
 
   let { show }: { show: ShowSlug } = $props();
@@ -88,6 +89,18 @@
     }
   }
 
+  let saving = $state(false);
+  async function keepsake() {
+    const input = conn ? keepsakeFrom(conn, show) : null;
+    if (!input || saving) return;
+    saving = true;
+    try {
+      await saveKeepsake(input);
+    } finally {
+      saving = false;
+    }
+  }
+
   function rejoin() {
     conn?.dispose();
     conn = null;
@@ -99,7 +112,15 @@
     <div class="world-mark"><WorldEmblem {show} /></div>
     <h1>{voice.ended.heading}</h1>
     <p class="muted">{voice.ended.body}</p>
-    <a class="btn" href="/{show}">Back to {SHOWS[show].name}</a>
+    <p class="muted">
+      Your card is still on this screen. Save it before you go: it’s drawn on your phone and never uploaded.
+    </p>
+    <div class="end-actions">
+      <button class="btn" type="button" onclick={keepsake} disabled={saving}>
+        {saving ? 'Drawing your card…' : 'Save my card'}
+      </button>
+      <a class="btn secondary" href="/{show}">Back to {SHOWS[show].name}</a>
+    </div>
   </section>
 {:else if conn && conn.status === 'kicked'}
   <section class="container narrow card done">
@@ -154,5 +175,10 @@
   }
   .done .btn {
     margin-top: 8px;
+  }
+  .end-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 </style>

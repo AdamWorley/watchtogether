@@ -44,6 +44,10 @@ export interface ShowVoice {
   badClaim: string;
   /** Large-screen sidebar tally: what a mark is called in this world, and whether to count in roman numerals. */
   tally: { unit: string; roman: boolean };
+  /** The full-house finale, played for the whole room. */
+  finale: { title: string; line: (name: string) => string };
+  /** Telly mode's leaderboard heading. */
+  board: string;
 }
 
 const REJOIN_BODY =
@@ -105,6 +109,8 @@ const traitors = (show: string): ShowVoice => ({
   rateLimited: 'Steady. Too much talking draws suspicion. Wait a moment.',
   badClaim: 'Not yet. Your marked squares don’t make that.',
   tally: { unit: 'fates turned', roman: true },
+  finale: { title: 'The reading is complete', line: (name) => `${name} has turned every fate.` },
+  board: 'The round table',
 });
 
 const strictly = (): ShowVoice => ({
@@ -158,6 +164,8 @@ const strictly = (): ShowVoice => ({
   rateLimited: 'It’s a waltz, not a quickstep! Slow down a moment.',
   badClaim: 'Not quite, darling. Your marked squares don’t make that.',
   tally: { unit: 'squares sewn', roman: false },
+  finale: { title: 'A perfect ten!', line: (name) => `${name} has danced every square, darling.` },
+  board: 'The leaderboard',
 });
 
 const jungle = (): ShowVoice => ({
@@ -206,6 +214,8 @@ const jungle = (): ShowVoice => ({
   rateLimited: 'Steady on, you’ll scare the wildlife. Wait a moment.',
   badClaim: 'Not yet. Your marked squares don’t make that.',
   tally: { unit: 'stars earned', roman: false },
+  finale: { title: 'Jungle royalty', line: (name) => `${name} has earned every star in camp.` },
+  board: 'The camp board',
 });
 
 const bakeoff = (): ShowVoice => ({
@@ -256,6 +266,8 @@ const bakeoff = (): ShowVoice => ({
   rateLimited: 'Let it prove a moment. Slow down.',
   badClaim: 'Not quite baked. Your marked squares don’t make that.',
   tally: { unit: 'squares iced', roman: false },
+  finale: { title: 'Star Baker!', line: (name) => `${name} has iced every square.` },
+  board: 'The bench',
 });
 
 const ice = (): ShowVoice => ({
@@ -304,6 +316,8 @@ const ice = (): ShowVoice => ({
   rateLimited: 'Easy, you’ll lose an edge. Wait a moment.',
   badClaim: 'Not yet. Your marked squares don’t make that.',
   tally: { unit: 'squares landed', roman: false },
+  finale: { title: 'A perfect 6.0', line: (name) => `${name} has landed every square.` },
+  board: 'The scoreboard',
 });
 
 const WORLD_VOICES: Record<WorldSlug, (showName: string) => ShowVoice> = {

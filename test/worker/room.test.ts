@@ -107,6 +107,20 @@ describe('room session', () => {
 });
 
 describe('bingo', () => {
+  it('shares progress counts with the room but never which squares', async () => {
+    const room = await createRoom();
+    const host = await connect(room);
+    const guest = await connect(await joinRoom(room.code, 'Guest'));
+    await host.next('welcome');
+    await guest.next('welcome');
+    for (const cell of [0, 1, 2]) host.send({ t: 'mark', cell, marked: true });
+    const update = await guest.next('members', (m) =>
+      m.members.some((x) => x.name === 'Host' && x.marked === 3),
+    );
+    expect(update.members.find((x) => x.name === 'Host')).toMatchObject({ marked: 3, best: 3 });
+    expect(guest.messages.some((m) => m.t === 'marks')).toBe(false);
+  });
+
   it('only accepts claims backed by marks, and announces the first', async () => {
     const room = await createRoom();
     const host = await connect(room);

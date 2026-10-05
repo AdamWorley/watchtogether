@@ -7,7 +7,9 @@
   import type { RoomConnection } from '../lib/room.svelte';
   import { loadSquares } from '../lib/squares';
   import { COMMON, VOICES } from '../lib/voice';
+  import { keepsakeFrom, saveKeepsake } from '../lib/keepsake';
   import BingoCard from './BingoCard.svelte';
+  import Finale from './Finale.svelte';
   import Chat from './Chat.svelte';
   import People from './People.svelte';
   import RoomRail from './RoomRail.svelte';
@@ -85,11 +87,14 @@
 
   // Claim banner: show the evidence card for a few seconds, and play the world's one full-card event.
   let banner = $state<typeof conn.latestClaim>(null);
+  let finale = $state<typeof conn.latestClaim>(null);
   let event = $state(false);
   $effect(() => {
     const claim = conn.latestClaim;
     if (!claim) return;
     banner = claim;
+    // A FULL HOUSE gets the world's finale for the whole room.
+    if (claim.kind === 'house') finale = claim;
     event = true;
     const e = setTimeout(() => (event = false), 1100);
     const t = setTimeout(() => (banner = null), 8000);
@@ -131,6 +136,19 @@
   }
 
   const display = (text: string) => (mask ? mask(text) : text);
+
+  let telly = $state(false);
+  let saving = $state(false);
+  async function keepsake() {
+    const input = keepsakeFrom(conn, show);
+    if (!input || saving) return;
+    saving = true;
+    try {
+      await saveKeepsake(input);
+    } finally {
+      saving = false;
+    }
+  }
 
   const noticeText = $derived(
     conn.notice === 'rate_limited'
@@ -226,6 +244,12 @@
       <p class="muted hint">
         {voice.hint}
       </p>
+      <div class="extras">
+        <button class="btn small secondary" type="button" onclick={() => (telly = true)}>Telly mode</button>
+        <button class="btn small secondary" type="button" onclick={keepsake} disabled={saving}>
+          {saving ? 'Drawing your card…' : 'Save my card'}
+        </button>
+      </div>
     </section>
 
     <section class="panel chat-panel card" aria-label="Chat">
@@ -251,6 +275,17 @@
       />
       <button class="btn small secondary" type="button" onclick={() => (banner = null)}>Dismiss</button>
     </div>
+  {/if}
+
+  {#if telly}
+    <!-- Big-screen view, loaded on demand (it carries the QR encoder). -->
+    {#await import('./TellyView.svelte') then TellyView}
+      <TellyView.default {conn} {show} {mask} onexit={() => (telly = false)} />
+    {/await}
+  {/if}
+
+  {#if finale}
+    <Finale {show} name={display(finale.name)} onclose={() => (finale = null)} />
   {/if}
 
   {#if noticeText}
@@ -425,6 +460,13 @@
     justify-content: center;
     flex-wrap: wrap;
     margin-top: 14px;
+  }
+  .extras {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
   }
   .hint {
     text-align: center;

@@ -442,6 +442,30 @@ It appears only while a card is face-down: mid-turn, during the deal, as the lef
 
 `/{show}/print` deals 1–24 unique cards, using the same uniqueness rule as a live room, for offline play with a pen. On screen they are white paper sheets on the world's ground. In print they are ink only, two per A4 page, with a name line. Each sheet keeps its world's display face for the title and FREE square, and Traitors keeps its roman numerals. The page loads on demand, so it never adds to the first-load budget.
 
+### Telly Mode
+
+Telly mode is a full-screen view, loaded on demand, for casting the room to the TV. Its type is sized in `vw` and `vh` so it can be read from the sofa.
+
+- **Leaderboard:** headed by the world's `voice.board`. Rows are ranked by full house, then line, then best line, then squares marked. Each row shows the name in its person colour, five best-line pips and the marked count. Only counts are shared, never which squares.
+- **Side column:** a black-on-white QR code (always, so phones can scan it), the room code and the last five feed items.
+- **Leaving:** Esc or "Leave telly mode" exits.
+
+### Full-House Finale
+
+When someone calls FULL HOUSE, an overlay shows one object from the world, the world's `finale.title` and the winner's name:
+
+- **Traitors:** a card turns from its back to an ultramarine XXIV face.
+- **Strictly:** a sequin glitterball drops and a gold 10 paddle goes up.
+- **I'm a Celeb:** the camp sign flares as its star burns in.
+- **Bake Off:** a Star Baker rosette spins in.
+- **Dancing on Ice:** three 6.0s flip up.
+
+Motion uses `cubic-bezier(0.16, 1, 0.3, 1)` with no overshoot. The overlay closes after 7s, on Esc or with its button.
+
+### Card Keepsake
+
+"Save my card" draws a 1080×1350 PNG on the device; nothing is uploaded. It reads the live world tokens and display face. It shows the card with marked tiles in the accent colour, the tally (roman numerals for Traitors), the player's calls and a watchtogether.uk date line. On phones it opens the share sheet, and elsewhere it downloads the file. It is offered in the room and on the ended screen.
+
 ### World Emblem and Lobby Door
 
 Each world has a decorative, `aria-hidden` emblem: three fanned tarot cards, a sequin swatch with a score paddle, a hanging camp sign, a cake seen from above with a rosette, or a rink with a 6.0 score and glints. On the show page and on its home door, the emblem reacts to hover and focus with its world's move.

@@ -47,6 +47,8 @@ export class RoomConnection {
   #timer: ReturnType<typeof setTimeout> | undefined;
   #ping: ReturnType<typeof setInterval> | undefined;
   #disposed = false;
+  /** The marks the server last confirmed; the optimistic UI falls back to these if a mark is refused. */
+  #confirmedMarks: number[] = [];
   readonly #session: Session;
 
   constructor(session: Session) {
@@ -100,6 +102,7 @@ export class RoomConnection {
         this.room = msg.room;
         this.card = msg.card;
         this.marks = msg.marks;
+        this.#confirmedMarks = msg.marks;
         this.members = msg.members;
         this.claims = msg.claims;
         // Rebuild the feed from the server's view so reconnects don't duplicate.
@@ -132,6 +135,7 @@ export class RoomConnection {
       }
       case 'marks':
         this.marks = msg.marks;
+        this.#confirmedMarks = msg.marks;
         break;
       case 'claim':
         this.claims.push(msg.claim);
@@ -143,6 +147,8 @@ export class RoomConnection {
         this.#ws?.close();
         break;
       case 'error':
+        // A refused (rate-limited) mark must not linger on screen as if it counted.
+        if (msg.code === 'rate_limited') this.marks = [...this.#confirmedMarks];
         this.notice =
           msg.code === 'rate_limited' || msg.code === 'bad_claim' || msg.code === 'already_claimed'
             ? msg.code

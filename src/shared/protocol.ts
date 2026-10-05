@@ -76,6 +76,14 @@ const Member = z.strictObject({
   name: z.string(),
   host: z.boolean(),
   online: z.boolean(),
+  /** Progress counts only (never which squares), for telly mode's leaderboard. */
+  marked: z
+    .number()
+    .int()
+    .min(0)
+    .max(CELLS - 1),
+  /** Most squares marked in any one line, counting the free centre (1-5). */
+  best: z.number().int().min(1).max(5),
 });
 export type Member = z.infer<typeof Member>;
 

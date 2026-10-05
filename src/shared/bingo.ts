@@ -69,6 +69,12 @@ export function isFullHouse(marks: Iterable<number>): boolean {
   return true;
 }
 
+/** Most marked cells in any single line (the free centre counts), 1-5. */
+export function bestLine(marks: Iterable<number>): number {
+  const set = markedSet(marks);
+  return Math.max(...LINES.map((line) => line.filter((cell) => set.has(cell)).length));
+}
+
 export type ClaimKind = 'line' | 'house';
 
 export function isValidClaim(kind: ClaimKind, marks: Iterable<number>): boolean {

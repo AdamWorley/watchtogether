@@ -52,6 +52,16 @@
       </p>
     </div>
 
+    {#if voice.tally.roman}
+      <!-- Traitors: the face-down cards still to be turned, as a deck on the table. -->
+      <div class="deck">
+        <div class="deck-stack" aria-hidden="true"><span></span><span></span><span></span></div>
+        <p class="deck-count">
+          <span>{24 - count === 0 ? 'None' : roman(24 - count)}</span> still face down
+        </p>
+      </div>
+    {/if}
+
     <dl class="facts">
       <div>
         <dt>In the room</dt>
@@ -124,6 +134,23 @@
     margin-top: 10px !important;
     font-size: 0.9rem;
     font-weight: 600;
+  }
+  .deck {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .deck-stack {
+    position: relative;
+    width: 44px;
+    height: 62px;
+    flex: none;
+  }
+  .deck-count {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.2;
   }
   .facts {
     margin: 0;

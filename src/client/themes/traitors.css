@@ -174,22 +174,179 @@
   color: var(--chrome);
 }
 
-/* Signature move: the turn. Edge-on at 50%, where the colours swap. */
+/* The card back: an authored tarot back laid over the face, shown only while a card is face-down. */
+[data-world='traitors'] .spread .cell::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: 2;
+  border-radius: 4px;
+  background: url('../assets/cardback.svg') center / 100% 100% no-repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/*
+ * Signature move: the turn. Marking a card spins it a full turn: the old face goes edge-on, the back
+ * shows through the middle of the spin, then the new face lands. Colours swap at the 3/4 edge.
+ */
 [data-world='traitors'] .spread .cell.just-changed {
-  --swap-delay: 170ms;
-  animation: tarot-turn 340ms cubic-bezier(0.45, 0, 0.25, 1);
+  --swap-delay: 450ms;
+  animation: tarot-turn 600ms cubic-bezier(0.45, 0, 0.25, 1);
+}
+
+[data-world='traitors'] .spread .cell.just-changed::before {
+  animation: tarot-back 600ms linear;
 }
 
 @keyframes tarot-turn {
   0% {
     transform: perspective(600px) rotateY(0deg);
   }
-  50% {
-    transform: perspective(600px) rotateY(90deg);
+  100% {
+    transform: perspective(600px) rotateY(360deg);
+  }
+}
+
+@keyframes tarot-back {
+  0%,
+  24.9% {
+    opacity: 0;
+  }
+  25%,
+  74.9% {
+    opacity: 1;
+  }
+  75%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The deal: on joining, every card arrives face-down and turns face-up in a ripple across the spread. */
+[data-world='traitors'] .spread.dealing .cell {
+  animation: tarot-deal 520ms cubic-bezier(0.3, 0, 0.2, 1) both;
+}
+
+[data-world='traitors'] .spread.dealing .cell::before {
+  animation: tarot-deal-back 520ms linear both;
+}
+
+@keyframes tarot-deal {
+  0% {
+    transform: perspective(600px) rotateY(-180deg);
   }
   100% {
     transform: perspective(600px) rotateY(0deg);
   }
+}
+
+@keyframes tarot-deal-back {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+[data-world='traitors'] .spread.dealing .cell:nth-child(2),
+[data-world='traitors'] .spread.dealing .cell:nth-child(2)::before {
+  animation-delay: 35ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(3),
+[data-world='traitors'] .spread.dealing .cell:nth-child(3)::before {
+  animation-delay: 70ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(4),
+[data-world='traitors'] .spread.dealing .cell:nth-child(4)::before {
+  animation-delay: 105ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(5),
+[data-world='traitors'] .spread.dealing .cell:nth-child(5)::before {
+  animation-delay: 140ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(6),
+[data-world='traitors'] .spread.dealing .cell:nth-child(6)::before {
+  animation-delay: 175ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(7),
+[data-world='traitors'] .spread.dealing .cell:nth-child(7)::before {
+  animation-delay: 210ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(8),
+[data-world='traitors'] .spread.dealing .cell:nth-child(8)::before {
+  animation-delay: 245ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(9),
+[data-world='traitors'] .spread.dealing .cell:nth-child(9)::before {
+  animation-delay: 280ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(10),
+[data-world='traitors'] .spread.dealing .cell:nth-child(10)::before {
+  animation-delay: 315ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(11),
+[data-world='traitors'] .spread.dealing .cell:nth-child(11)::before {
+  animation-delay: 350ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(12),
+[data-world='traitors'] .spread.dealing .cell:nth-child(12)::before {
+  animation-delay: 385ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(13),
+[data-world='traitors'] .spread.dealing .cell:nth-child(13)::before {
+  animation-delay: 420ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(14),
+[data-world='traitors'] .spread.dealing .cell:nth-child(14)::before {
+  animation-delay: 455ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(15),
+[data-world='traitors'] .spread.dealing .cell:nth-child(15)::before {
+  animation-delay: 490ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(16),
+[data-world='traitors'] .spread.dealing .cell:nth-child(16)::before {
+  animation-delay: 525ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(17),
+[data-world='traitors'] .spread.dealing .cell:nth-child(17)::before {
+  animation-delay: 560ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(18),
+[data-world='traitors'] .spread.dealing .cell:nth-child(18)::before {
+  animation-delay: 595ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(19),
+[data-world='traitors'] .spread.dealing .cell:nth-child(19)::before {
+  animation-delay: 630ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(20),
+[data-world='traitors'] .spread.dealing .cell:nth-child(20)::before {
+  animation-delay: 665ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(21),
+[data-world='traitors'] .spread.dealing .cell:nth-child(21)::before {
+  animation-delay: 700ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(22),
+[data-world='traitors'] .spread.dealing .cell:nth-child(22)::before {
+  animation-delay: 735ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(23),
+[data-world='traitors'] .spread.dealing .cell:nth-child(23)::before {
+  animation-delay: 770ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(24),
+[data-world='traitors'] .spread.dealing .cell:nth-child(24)::before {
+  animation-delay: 805ms;
+}
+[data-world='traitors'] .spread.dealing .cell:nth-child(25),
+[data-world='traitors'] .spread.dealing .cell:nth-child(25)::before {
+  animation-delay: 840ms;
 }
 
 [data-world='traitors'] .spread button.cell:hover {
@@ -423,4 +580,32 @@
     inset 0 0 0 5px var(--surface),
     inset 0 0 0 6.5px var(--chrome),
     var(--shadow);
+}
+
+/* Emblem: the left-hand card of the fan lies face-down. */
+[data-world='traitors'] .emblem .card-face.card-back {
+  background: url('../assets/cardback.svg') center / 100% 100% no-repeat;
+  border: 0;
+  box-shadow: 0 6px 14px rgb(5 3 15 / 0.5);
+}
+
+/* Sidebar deck: three backs stacked with a slight fan, like a deck waiting on the reading cloth. */
+[data-world='traitors'] .deck-stack span {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: url('../assets/cardback.svg') center / 100% 100% no-repeat;
+  box-shadow: 0 3px 8px rgb(5 3 15 / 0.5);
+}
+
+[data-world='traitors'] .deck-stack span:nth-child(1) {
+  transform: translate(-3px, 3px) rotate(-6deg);
+}
+
+[data-world='traitors'] .deck-stack span:nth-child(2) {
+  transform: translate(-1px, 1px) rotate(-2deg);
+}
+
+[data-world='traitors'] .deck-count span {
+  color: var(--chrome);
 }

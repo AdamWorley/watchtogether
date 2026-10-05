@@ -421,11 +421,26 @@ Full-height, tactile and set in the world's display face.
 
 A 5×5 grid of real `<button>`s with `aria-pressed`, plus a free centre. State lives in `data-state` (plain, marked, free, win) and `data-near`. `just-changed` fires the signature move, and `.event` on the grid plays the claim moment. Each world skins the tile:
 
-- **Traitors:** a 5:7 tarot card with a bone face, ink border, inner keyline and a roman-numeral head. Marking it rotates the card through 90° over 340ms, and the colours swap edge-on to an ultramarine face with a gilt keyline. The win state adds a vermilion edge. A claimed LINE inverts the whole spread for 150ms.
+- **Traitors:** a 5:7 tarot card with a bone face, ink border, inner keyline and a roman-numeral head. Marking it spins the card a full turn over 600ms: the authored back (`cardback.svg`) shows through the middle of the spin, and the colours swap at the three-quarter edge to an ultramarine face with a gilt keyline. On joining, the spread is dealt face-down and turns face-up in a 35ms-per-card ripple. The win state adds a vermilion edge. A claimed LINE inverts the whole spread for 150ms.
 - **Strictly:** a chiffon panel with a dotted rhinestone edge. Marking sews in the wearer's `--person` sequins (a masked `sequins.svg`) with a white stitched edge, and the caption sits on a velvet plate. One 720ms light sweep crosses the new sequins. The near-line tile gets a gold dotted glint that pulses twice. A claim sweeps the card column by column.
 - **I'm a Celeb:** a flat cedar plank. Marking scorches it radially and burns in a `star.svg` brand with an ember rim (a 420ms flare). The win state turns the edge and stars gold. The near-line tile is lashed with dashed torch rope. A claim flares every branded plank.
 - **Bake Off:** pastel fondant with dotted royal-icing piping. Marking showers `sprinkles.svg` in over 460ms, the piping turns solid, and the caption sits on an icing glaze. The win state gets a gold-leaf edge. The near-line tile gets raspberry piping. A claim showers the tray row by row.
 - **Dancing on Ice:** a dark rink tile with a frost top light. Marking floods it ice-cyan, and a `glint.svg` star spins in (520ms) while a light streak crosses. The win state gets a gold edge. The near-line tile gets a dashed frost edge. The free centre is bolero violet.
+
+### Tarot Card Back (Traitors)
+
+`cardback.svg` is an authored back in the deck's own inks, drawn with 180° rotational symmetry like a real tarot back:
+
+- an ultramarine field with a fine chrome lattice and star crossings
+- a bone outer keyline and a gilt inner frame
+- mirrored vermilion turrets top and bottom
+- a sun-and-moon medallion at the centre
+
+It appears only while a card is face-down: mid-turn, during the deal, as the left card of the emblem fan, and as the sidebar deck. The deck stacks three backs beside "N still face down" in roman numerals.
+
+### Printable Cards
+
+`/{show}/print` deals 1–24 unique cards, using the same uniqueness rule as a live room, for offline play with a pen. On screen they are white paper sheets on the world's ground. In print they are ink only, two per A4 page, with a name line. Each sheet keeps its world's display face for the title and FREE square, and Traitors keeps its roman numerals. The page loads on demand, so it never adds to the first-load budget.
 
 ### World Emblem and Lobby Door
 

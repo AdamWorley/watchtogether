@@ -34,6 +34,7 @@
         Everyone gets their own 24 squares, drawn from {total} of the show’s favourite moments. Tap one when it
         happens on screen.
       </p>
+      <p class="print-link"><a href="/{show}/print">Print cards for offline play</a></p>
       <div class="spread taster" aria-hidden="true">
         {#each picks as text, i (i)}
           <div class="cell" data-state={i === 1 || i === 3 ? 'marked' : 'plain'}>
@@ -49,6 +50,10 @@
 <style>
   .taster-wrap {
     margin-top: 16px;
+  }
+  .print-link {
+    margin: 4px 0 0;
+    font-weight: 700;
   }
   .taster-card h2 {
     margin-bottom: 0.3em;

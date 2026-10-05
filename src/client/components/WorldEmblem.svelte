@@ -10,7 +10,8 @@
 <!-- Decorative: a physical sample of the show's world (styled in src/client/themes). -->
 <div class="emblem" aria-hidden="true">
   {#if world === 'traitors'}
-    {#each voice.emblem as card (card.n)}
+    <div class="card-face card-back"></div>
+    {#each voice.emblem.slice(1) as card (card.n)}
       <div class="card-face"><span class="n">{card.n}</span><span class="t">{card.t}</span></div>
     {/each}
   {:else if world === 'strictly'}

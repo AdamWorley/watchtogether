@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { FREE, FREE_CELL, LINES } from '../../shared/bingo';
   import type { ShowSlug } from '../../shared/shows';
   import { fitCaption } from '../lib/fit';
@@ -42,6 +43,15 @@
     card.map((_, cell) => (cell === FREE_CELL ? '0' : roman(cell < FREE_CELL ? cell + 1 : cell))),
   );
 
+  // The deal: your own card arrives face-down and turns face-up once (worlds that have card backs style it).
+  let dealing = $state(false);
+  onMount(() => {
+    if (!ontoggle || compact) return;
+    dealing = true;
+    const t = setTimeout(() => (dealing = false), 1500);
+    return () => clearTimeout(t);
+  });
+
   let changed = $state<number | null>(null);
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -59,7 +69,7 @@
   }
 </script>
 
-<div class="spread" class:compact class:event role="group" aria-label={label}>
+<div class="spread" class:compact class:event class:dealing role="group" aria-label={label}>
   {#each card as value, cell (cell)}
     {@const free = value === FREE}
     {@const text = free ? voice.free.name : (squares[value] ?? '?')}

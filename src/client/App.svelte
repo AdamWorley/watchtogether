@@ -5,7 +5,6 @@
   import Home from './routes/Home.svelte';
   import NotFound from './routes/NotFound.svelte';
   import Privacy from './routes/Privacy.svelte';
-  import RoomPage from './routes/RoomPage.svelte';
   import ShowPage from './routes/ShowPage.svelte';
 
   type Route =
@@ -13,6 +12,7 @@
     | { name: 'privacy' }
     | { name: 'show'; show: ShowSlug }
     | { name: 'room'; show: ShowSlug }
+    | { name: 'print'; show: ShowSlug }
     | { name: 'not-found' };
 
   function match(path: string): Route {
@@ -23,11 +23,14 @@
     if (!isShowSlug(show) || rest.length) return { name: 'not-found' };
     if (sub === undefined) return { name: 'show', show };
     if (sub === 'room') return { name: 'room', show };
+    if (sub === 'print') return { name: 'print', show };
     return { name: 'not-found' };
   }
 
   const route = $derived(match(router.path));
-  const show = $derived(route.name === 'show' || route.name === 'room' ? route.show : null);
+  const show = $derived(
+    route.name === 'show' || route.name === 'room' || route.name === 'print' ? route.show : null,
+  );
 
   // Theme + title follow the route. Set via the DOM API, never inline styles (CSP: style-src 'self').
   $effect(() => {
@@ -61,10 +64,28 @@
     {#key route.show}
       <ShowPage show={route.show} />
     {/key}
+  {:else if route.name === 'print'}
+    <!-- Rarely used, so it loads on demand and stays out of the first-load bundle. -->
+    {#await import('./routes/PrintPage.svelte') then PrintPage}
+      {#key route.show}
+        <PrintPage.default show={route.show} />
+      {/key}
+    {:catch}
+      <section class="container">
+        <p class="error" role="alert">Couldn’t load the print page. Refresh to try again.</p>
+      </section>
+    {/await}
   {:else if route.name === 'room'}
-    {#key route.show}
-      <RoomPage show={route.show} />
-    {/key}
+    <!-- The room (card, chat, live connection) loads on demand, keeping the lobby's first load small. -->
+    {#await import('./routes/RoomPage.svelte') then RoomPage}
+      {#key route.show}
+        <RoomPage.default show={route.show} />
+      {/key}
+    {:catch}
+      <section class="container">
+        <p class="error" role="alert">Couldn’t load the room. Refresh to try again.</p>
+      </section>
+    {/await}
   {:else}
     <NotFound />
   {/if}

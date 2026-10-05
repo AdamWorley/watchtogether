@@ -81,3 +81,14 @@ for (const [path, family] of WORLD_FACES) {
     expect(result.real).not.toBeCloseTo(result.fallback, 0);
   });
 }
+
+test('every page has one-tap navigation back to the lobby', async ({ page }) => {
+  for (const path of ['/traitors', '/strictly/print', '/privacy', '/traitors/room#ZZZZZ-ZZZZZ']) {
+    await page.goto(path);
+    await page.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'WatchTogether' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('The telly’s on');
+  }
+  // The lobby itself doesn't need the bar.
+  await expect(page.getByRole('navigation', { name: 'Site' })).toHaveCount(0);
+});

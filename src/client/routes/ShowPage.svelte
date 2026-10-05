@@ -54,7 +54,6 @@
 
 <section class="container hero">
   <div class="intro">
-    <a class="back" href="/">All shows</a>
     <h1>{SHOWS[show].name}</h1>
     <p class="muted tagline">{voice.tagline}</p>
   </div>

@@ -1,7 +1,7 @@
 // Fit a bingo caption inside its tile's frame without ever splitting a word that can't carry a hyphen.
 // Each world sets its tile padding to clear its own frame (keyline, piping, rope...). If the caption's
-// widest unbreakable word doesn't fit inside that padding, step the type down (fit-1..3 classes, styled in
-// app.css) until it does. Classes, not inline styles: our CSP forbids style attributes.
+// widest unbreakable word wraps or crosses that padding in the real layout, step the type down (fit-1..3
+// classes, styled in app.css) until it doesn't. Classes, not inline styles: our CSP forbids style attributes.
 
 const STEPS = ['fit-1', 'fit-2', 'fit-3'] as const;
 
@@ -12,45 +12,43 @@ function breakable(word: string): boolean {
   return /^[a-z]/.test(core) && core.replace(/[^a-z]/gi, '').length >= 9;
 }
 
-let canvas: CanvasRenderingContext2D | null = null;
-
-function widestUnbreakable(node: HTMLElement): number {
-  canvas ??= document.createElement('canvas').getContext('2d');
-  if (!canvas) return 0;
-  const style = getComputedStyle(node);
-  canvas.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-  const tracking = parseFloat(style.letterSpacing) || 0;
-  let widest = 0;
-  for (const word of (node.textContent ?? '').split(/\s+/)) {
-    if (!word || breakable(word)) continue;
-    widest = Math.max(widest, canvas.measureText(word).width + tracking * word.length);
-  }
-  return widest;
+/** The tile's content box: inside its padding, which each world sets to clear its frame. */
+function frame(cell: HTMLElement): { left: number; right: number } {
+  const c = getComputedStyle(cell);
+  const box = cell.getBoundingClientRect();
+  const left = box.left + cell.clientLeft + parseFloat(c.paddingLeft);
+  return { left, right: left + cell.clientWidth - parseFloat(c.paddingLeft) - parseFloat(c.paddingRight) };
 }
 
-function available(node: HTMLElement, cell: HTMLElement): number {
-  const c = getComputedStyle(cell);
-  const t = getComputedStyle(node);
-  return (
-    cell.clientWidth -
-    parseFloat(c.paddingLeft) -
-    parseFloat(c.paddingRight) -
-    parseFloat(t.paddingLeft) -
-    parseFloat(t.paddingRight)
-  );
+/**
+ * Measure the real layout (not a canvas estimate, which can resolve fonts like system-ui differently):
+ * true if any unbreakable word wraps across lines or pokes outside the frame.
+ */
+function misfits(node: HTMLElement, cell: HTMLElement): boolean {
+  const { left, right } = frame(cell);
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+    for (const m of (text.textContent ?? '').matchAll(/\S+/g)) {
+      if (breakable(m[0])) continue;
+      range.setStart(text, m.index);
+      range.setEnd(text, m.index + m[0].length);
+      const rects = [...range.getClientRects()].filter((r) => r.width > 0);
+      if (new Set(rects.map((r) => Math.round(r.top))).size > 1) return true;
+      if (rects.some((r) => r.left < left - 0.5 || r.right > right + 0.5)) return true;
+    }
+  }
+  return false;
 }
 
 function fit(node: HTMLElement): void {
   const cell = node.closest<HTMLElement>('.cell');
   if (!cell || cell.clientWidth === 0) return;
   node.classList.remove(...STEPS);
-  for (const step of [null, ...STEPS]) {
-    if (step) {
-      node.classList.remove(...STEPS);
-      node.classList.add(step);
-    }
-    // 2px of slack: canvas measurement and layout round sub-pixels differently.
-    if (widestUnbreakable(node) <= available(node, cell) - 2) return;
+  for (const step of STEPS) {
+    if (!misfits(node, cell)) return;
+    node.classList.remove(...STEPS);
+    node.classList.add(step);
   }
 }
 

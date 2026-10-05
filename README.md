@@ -4,7 +4,7 @@ Live, ephemeral watch-party rooms for **The Celebrity Traitors** and **Strictly 
 card per person and a live chat. Rooms open 30 minutes before an episode airs, close one hour after it ends, and
 are then permanently deleted. There are no accounts, cookies or analytics.
 
-Production: <https://watchtogether.uk> · Staging: <https://staging.watchtogether.uk>
+Production: <https://watchtogether.uk> · Each PR gets its own preview URL.
 
 ## How it works
 
@@ -91,25 +91,33 @@ GitHub Actions does everything:
   - JS size budget (60 KB gzip)
   - `wrangler deploy --dry-run`
   - Playwright
-- **`deploy.yml`** runs on every push to `main`. It reruns CI, then deploys to staging, runs a smoke test, and
-  then deploys to production behind the `production` environment's approval.
+  - once all of that passes, a **Worker Preview** (`wrangler preview --name pr-<n>`), smoke-tested, with its
+    URL on the PR's "View deployment" button and in the job summary. Pushing to the branch updates it.
+- **`preview-cleanup.yml`** deletes the PR's Preview when the PR is merged or closed.
+- **`deploy.yml`** runs on every push to `main`. It reruns CI, deploys to production and runs a smoke test.
 - **`codeql.yml`** runs on PRs, on pushes to `main`, and weekly.
 
-PR preview URLs aren't available, because Cloudflare doesn't generate version URLs for Workers that define
-Durable Objects. Staging is the preview after merge.
+There is no staging environment: the PR Preview is where you check a change before merging. Each Preview gets
+its own Durable Object storage, so rooms opened there never mix with production. All Previews share one
+preview-only KV namespace (TVmaze cache and room codes). Previews don't run the cron; they fetch the schedule
+from TVmaze on first request, so a room can only be opened on a Preview while a show is actually on air.
+PRs from forks and Dependabot get no Preview, because they don't receive secrets.
 
 ### One-time setup
 
 1. **Cloudflare API token** (My Profile → API Tokens), scoped to this account only, with these permissions:
    Account › Workers Scripts: Edit, Account › Workers KV Storage: Edit, Zone › Workers Routes: Edit
    (zone `watchtogether.uk`) and Zone › DNS: Edit (for the custom domains).
-2. **GitHub → Settings → Environments.** Create `staging` and `production`, each with the secrets
-   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Add required reviewers to `production`.
+2. **GitHub → Settings → Environments.** Create `preview` and `production`, each with the secrets
+   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Restrict `production` to the `main` branch. Required
+   reviewers on `production` are optional now that merging is the release step.
 3. **GitHub → Settings → Branches.** Protect `main`: require a PR, and require the status checks
    _Lint, type-check, test, build_, _End-to-end (Playwright)_ and _CodeQL / analyze_.
 4. The first deploy creates the KV namespaces, the Durable Object class and the custom domains
-   (`watchtogether.uk`, `staging.watchtogether.uk`). After that, in the Cloudflare dashboard:
+   (`watchtogether.uk`). After that, in the Cloudflare dashboard:
    - Add a redirect rule from `www.watchtogether.uk` to the apex.
    - Turn on Always Use HTTPS.
    - Set minimum TLS to 1.2.
    - Once you're happy, submit the domain to <https://hstspreload.org>.
+   - Optional: Previews are public `workers.dev` URLs. To keep them private, turn on Cloudflare Access for
+     this Worker's Previews (Worker → Settings → Domains).

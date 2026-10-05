@@ -67,7 +67,7 @@ isn't affiliated with the BBC or the shows' producers. What makes it what it is:
   - No XSS or other exploits: a strict CSP and Trusted Types, and no inline scripts or styles.
   - Heavy CDN caching.
   - Responsive and mobile-first.
-  - Hosted on Cloudflare Workers with Durable Objects at `watchtogether.uk` (staging: `staging.watchtogether.uk`).
+  - Hosted on Cloudflare Workers with Durable Objects at `watchtogether.uk`, with a Worker Preview per PR instead of a staging site.
   - Deployed by GitHub Actions, with build and tests gating every PR.
   - First-load JavaScript is budgeted at 60 KB gzipped.
 - **Undecided.** Which shows come after the first two. Whether host controls should pass to someone else when

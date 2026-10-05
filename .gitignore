@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.wrangler
+.dev.vars*
+!.dev.vars.example
+playwright-report
+test-results
+.DS_Store
+*.log
+
+# Impeccable working files (surface briefs and design.json are kept)
+.impeccable/decision
+.impeccable/review
+.impeccable/mocks

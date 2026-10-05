@@ -1,0 +1,9 @@
+dist
+coverage
+node_modules
+.wrangler
+playwright-report
+test-results
+package-lock.json
+src/worker/worker-configuration.d.ts
+.impeccable

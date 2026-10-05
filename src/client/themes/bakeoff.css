@@ -1,0 +1,321 @@
+/*
+ * The Great British Bake Off: Piped Icing & Sprinkles.
+ * Pastel fondant tiles edged in piped royal icing, on a dark chocolate-ganache ground.
+ * Marking a square showers it in hundreds-and-thousands and glazes its label.
+ * State is never colour alone: marked = sprinkles texture + solid piped edge; near-line = raspberry dotted icing.
+ */
+@font-face {
+  font-family: 'Leckerli One';
+  src: url('../assets/fonts/leckerli-one-latin.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+}
+
+[data-world='bakeoff'] {
+  color-scheme: dark;
+  --font-display: 'Leckerli One', 'Brush Script MT', Georgia, serif;
+  --display-case: none;
+  --display-tracking: 0;
+
+  --ganache: #22120c;
+  --pink: #f6b7c8;
+  --mint: #a8e3cf;
+  --lemon: #f6e39a;
+  --lavender: #cdbcf0;
+  --icing: #fff8f1;
+  --raspberry: #e5466b;
+  --gold: #e8b04a;
+  --cocoa: #3a2016;
+
+  --bg: var(--ganache);
+  --surface: #2e1912;
+  --surface-2: #3b2219;
+  --text: #fbefe6;
+  --muted: #d6bfb1;
+  --border: #4a2c20;
+  --accent: var(--pink);
+  --accent-text: var(--cocoa);
+  --danger: #ff8fa6;
+  --ok: #a8e3cf;
+  --focus: var(--lemon);
+  --selection: rgb(246 183 200 / 0.4);
+
+  --radius: 20px;
+  --radius-control: 999px;
+  --radius-input: 14px;
+  --keyline: 2px;
+  --shadow: 0 2px 6px rgb(0 0 0 / 0.35), 0 16px 34px rgb(10 3 0 / 0.5);
+  --btn-tracking: 0.01em;
+  --btn-size: 1.12rem;
+  --btn-weight: 400;
+
+  --c0: var(--pink);
+  --c1: var(--mint);
+  --c2: var(--lemon);
+  --c3: var(--lavender);
+  --c4: #ffb38a;
+  --c5: var(--icing);
+}
+
+/* ------------------------------------------------------------------ the tray of fondant tiles */
+
+[data-world='bakeoff'] .spread {
+  gap: clamp(5px, 1.3vw, 9px);
+  grid-auto-rows: 1fr;
+}
+
+[data-world='bakeoff'] .spread .cell {
+  --fondant: var(--pink);
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(70px, 19vw, 112px);
+  /* clears the piped-icing border (3px wide, 6px in) */
+  padding: 7px 7px;
+  background: var(--fondant);
+  color: var(--cocoa);
+  border: 0;
+  border-radius: 14px;
+  /* piped royal-icing border */
+  outline: 3px dotted var(--icing);
+  outline-offset: -6px;
+  box-shadow:
+    inset 0 -4px 0 rgb(58 32 22 / 0.18),
+    0 3px 0 rgb(0 0 0 / 0.35);
+  font-size: clamp(0.6rem, 2.35vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* four fondants, cycled across the tray */
+[data-world='bakeoff'] .spread .cell:nth-child(4n + 2) {
+  --fondant: var(--mint);
+}
+[data-world='bakeoff'] .spread .cell:nth-child(4n + 3) {
+  --fondant: var(--lemon);
+}
+[data-world='bakeoff'] .spread .cell:nth-child(4n + 4) {
+  --fondant: var(--lavender);
+}
+
+[data-world='bakeoff'] .spread .num {
+  display: none;
+}
+
+[data-world='bakeoff'] .spread .txt {
+  position: relative;
+  z-index: 2;
+  padding: 3px 4px;
+  border-radius: 8px;
+}
+
+/* hundreds-and-thousands */
+[data-world='bakeoff'] .spread .cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: url('../assets/sprinkles.svg') 0 0 / 30px 30px repeat;
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-world='bakeoff'] .spread .cell[data-state='marked'],
+[data-world='bakeoff'] .spread .cell[data-state='free'],
+[data-world='bakeoff'] .spread .cell[data-state='win'] {
+  outline: 3px solid var(--icing);
+  outline-offset: -5px;
+}
+
+[data-world='bakeoff'] .spread .cell[data-state='marked']::before,
+[data-world='bakeoff'] .spread .cell[data-state='free']::before,
+[data-world='bakeoff'] .spread .cell[data-state='win']::before {
+  opacity: 1;
+}
+
+/* the label sits on a glaze so it stays readable over the sprinkles */
+[data-world='bakeoff'] .spread .cell[data-state='marked'] .txt,
+[data-world='bakeoff'] .spread .cell[data-state='free'] .txt,
+[data-world='bakeoff'] .spread .cell[data-state='win'] .txt {
+  background: rgb(255 248 241 / 0.92);
+  color: var(--cocoa);
+}
+
+[data-world='bakeoff'] .spread .cell[data-state='free'] {
+  --fondant: var(--gold);
+}
+
+[data-world='bakeoff'] .spread .cell[data-state='free'] .txt {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(0.7rem, 2.6vw, 0.95rem);
+}
+
+[data-world='bakeoff'] .spread .free-sub {
+  font-family: var(--font-body);
+  font-size: 0.68em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--raspberry);
+}
+
+/* Winning line: gold-leaf edge. */
+[data-world='bakeoff'] .spread .cell[data-state='win'] {
+  outline: 3px solid var(--gold);
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 3px 0 rgb(0 0 0 / 0.35);
+}
+
+/* The tile that would finish a line: raspberry piping. */
+[data-world='bakeoff'] .spread .cell[data-near] {
+  outline: 3px dotted var(--raspberry);
+}
+
+/* Signature move: the sprinkle shower. */
+[data-world='bakeoff'] .spread .cell.just-changed::before {
+  animation: sprinkle-fall 460ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes sprinkle-fall {
+  from {
+    opacity: 0;
+    background-position: 0 -26px;
+  }
+}
+
+/* A claim: the whole tray gets a fresh shower, row by row. */
+[data-world='bakeoff'] .spread.event .cell:not([data-state='plain'])::before {
+  animation: sprinkle-fall 600ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+[data-world='bakeoff'] .spread.event .cell:nth-child(n + 6)::before {
+  animation-delay: 80ms;
+}
+[data-world='bakeoff'] .spread.event .cell:nth-child(n + 11)::before {
+  animation-delay: 160ms;
+}
+[data-world='bakeoff'] .spread.event .cell:nth-child(n + 16)::before {
+  animation-delay: 240ms;
+}
+[data-world='bakeoff'] .spread.event .cell:nth-child(n + 21)::before {
+  animation-delay: 320ms;
+}
+
+[data-world='bakeoff'] .spread button.cell:active {
+  transform: scale(0.97);
+}
+
+[data-world='bakeoff'] .spread.compact {
+  gap: 3px;
+}
+
+[data-world='bakeoff'] .spread.compact .cell {
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 4px;
+  outline: none;
+  box-shadow: none;
+}
+
+[data-world='bakeoff'] .spread.compact .cell::before {
+  background-size: 14px 14px;
+}
+
+/* ------------------------------------------------------------------ emblem: a cake from above */
+
+[data-world='bakeoff'] .emblem {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  flex: none;
+}
+
+[data-world='bakeoff'] .emblem .cake {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background:
+    url('../assets/sprinkles.svg') center / 34px 34px repeat,
+    radial-gradient(circle at 50% 50%, var(--pink) 0 58%, var(--icing) 58% 62%, var(--pink) 62% 100%);
+  outline: 4px dotted var(--icing);
+  outline-offset: -8px;
+  box-shadow:
+    0 12px 26px rgb(0 0 0 / 0.5),
+    inset 0 -8px 0 rgb(58 32 22 / 0.18);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-world='bakeoff'] .emblem .rosette {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-6deg);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--raspberry);
+  color: var(--icing);
+  border: 3px dotted var(--icing);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.35);
+}
+
+[data-world='bakeoff'].door:hover .emblem .cake,
+[data-world='bakeoff'].door:focus-visible .emblem .cake {
+  transform: rotate(18deg);
+}
+
+/* ------------------------------------------------------------------ large-screen sidebar: the bench */
+
+[data-world='bakeoff'] .rail {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* bunting along the top */
+[data-world='bakeoff'] .rail-head {
+  height: 24px;
+  background:
+    linear-gradient(135deg, var(--pink) 25%, transparent 25%) 0 0 / 24px 24px repeat-x,
+    linear-gradient(225deg, var(--pink) 25%, transparent 25%) 0 0 / 24px 24px repeat-x,
+    var(--surface-2);
+}
+
+[data-world='bakeoff'] .tally {
+  background: var(--pink);
+  color: var(--cocoa);
+  border-radius: 18px;
+  outline: 3px dotted var(--icing);
+  outline-offset: -8px;
+}
+
+[data-world='bakeoff'] .tally-num span {
+  color: var(--cocoa);
+}
+
+[data-world='bakeoff'] .tally-num small,
+[data-world='bakeoff'] .tally-line {
+  color: var(--cocoa);
+}
+
+[data-world='bakeoff'] .rail .btn {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  [data-world='bakeoff'] .spread:not(.compact) {
+    max-width: 680px;
+  }
+}
+
+/* Every panel is piped with royal icing. */
+[data-world='bakeoff'] .card {
+  outline: 3px dotted rgb(255 248 241 / 0.45);
+  outline-offset: -10px;
+}

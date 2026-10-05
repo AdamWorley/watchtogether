@@ -1,0 +1,331 @@
+/*
+ * I'm a Celebrity: Torchlit Camp Signage.
+ * Sign-painted wooden camp planks (flat cedar, char keyline, pinstripe) and flame light on a jungle-night ground.
+ * Marking a square brands it: the plank chars dark and a Bushtucker star is burned in.
+ * State is never colour alone: marked = charred plank + burned star; near-line = torch-orange rope edge.
+ */
+@font-face {
+  font-family: 'Rye';
+  src: url('../assets/fonts/rye-latin.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+}
+
+[data-world='jungle'] {
+  color-scheme: dark;
+  --font-display: 'Rye', 'Rockwell', Georgia, serif;
+  --display-case: none;
+  --display-tracking: 0.01em;
+
+  --night: #0c1710;
+  --cedar: #a8743d;
+  --cedar-light: #c08a4c;
+  --char: #2e1b0e;
+  --rope: #cfa86a;
+  --torch: #ff8a1f;
+  --ember: #ffc46b;
+  --leaf: #4fa463;
+
+  --bg: var(--night);
+  --surface: #14231a;
+  --surface-2: #1d3124;
+  --text: #f3ead8;
+  --muted: #b9c2a8;
+  --border: #2c4232;
+  --accent: var(--torch);
+  --accent-text: #1c0f04;
+  --danger: #ff8a7a;
+  --ok: #7fd18f;
+  --focus: var(--ember);
+  --selection: rgb(255 138 31 / 0.35);
+
+  --radius: 10px;
+  --radius-control: 8px;
+  --radius-input: 8px;
+  --keyline: 2px;
+  --shadow: 0 2px 0 rgb(0 0 0 / 0.4), 0 14px 30px rgb(0 0 0 / 0.5);
+  --btn-tracking: 0.02em;
+  --btn-size: 1.08rem;
+  --btn-weight: 400;
+
+  --c0: var(--torch);
+  --c1: #7fd18f;
+  --c2: #ffd84d;
+  --c3: #ff8a7a;
+  --c4: #8ec9ff;
+  --c5: var(--rope);
+}
+
+/* Torchlight from above the canopy. */
+html[data-world='jungle'] body {
+  background: radial-gradient(90% 55% at 50% -12%, rgb(255 138 31 / 0.16) 0%, transparent 65%), var(--night);
+  background-attachment: fixed;
+}
+
+/* ------------------------------------------------------------------ the camp board */
+
+[data-world='jungle'] .spread {
+  gap: clamp(4px, 1.1vw, 8px);
+  grid-auto-rows: 1fr;
+}
+
+/* A sign-painted plank: flat cedar, a char keyline and the painter's pinstripe. No faked grain or bevel. */
+[data-world='jungle'] .spread .cell {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(70px, 19vw, 112px);
+  /* clears the painted pinstripe (4.5px in) and the near-line rope (3px wide, 6px in) */
+  padding: 7px 7px;
+  background: var(--cedar);
+  color: #22120a;
+  border: 2px solid var(--char);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 3px var(--cedar),
+    inset 0 0 0 4.5px #6b4220,
+    0 4px 10px rgb(0 0 0 / 0.4);
+  font-size: clamp(0.6rem, 2.35vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+[data-world='jungle'] .spread .num {
+  display: none;
+}
+
+[data-world='jungle'] .spread .txt {
+  position: relative;
+  z-index: 1;
+}
+
+/* The brand: a Bushtucker star burned into the middle of the plank, its edge still glowing. */
+[data-world='jungle'] .spread .cell::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: 64%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  /* a burnt-orange brand with a glowing ember rim: legible at a glance on the charred plank */
+  background: #8a3b0f;
+  -webkit-mask: url('../assets/star.svg') center / contain no-repeat;
+  mask: url('../assets/star.svg') center / contain no-repeat;
+  filter: drop-shadow(0 0 1px #ffb04a) drop-shadow(0 0 1px #ffb04a) drop-shadow(0 0 6px rgb(255 138 31 / 0.7));
+  opacity: 0;
+  scale: 0.4;
+}
+
+/* Marked: the plank is scorched from the brand outward, and the lettering glows ember. */
+[data-world='jungle'] .spread .cell[data-state='marked'],
+[data-world='jungle'] .spread .cell[data-state='free'],
+[data-world='jungle'] .spread .cell[data-state='win'] {
+  background: radial-gradient(circle at 50% 50%, #170a04 0 30%, #2c160a 50%, #4a2911 74%, #603a1a 100%);
+  color: #ffdcab;
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.95),
+    0 0 6px rgb(0 0 0 / 0.8);
+  box-shadow:
+    inset 0 0 0 3px #4a2911,
+    inset 0 0 0 4.5px var(--torch),
+    0 4px 10px rgb(0 0 0 / 0.4);
+}
+
+[data-world='jungle'] .spread .cell[data-state='marked']::after,
+[data-world='jungle'] .spread .cell[data-state='free']::after,
+[data-world='jungle'] .spread .cell[data-state='win']::after {
+  opacity: 1;
+  scale: 1;
+}
+
+[data-world='jungle'] .spread .cell[data-state='free'] .txt {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(0.5rem, 2.05vw, 0.92rem);
+  white-space: nowrap;
+}
+
+[data-world='jungle'] .spread .free-sub {
+  font-family: var(--font-body);
+  font-size: 0.72em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--torch);
+}
+
+/* Winning line: gold stars, torch-gold edge. */
+[data-world='jungle'] .spread .cell[data-state='win'] {
+  border-color: #ffd84d;
+}
+
+[data-world='jungle'] .spread .cell[data-state='win']::after {
+  filter: drop-shadow(0 0 1.5px #ffd84d) drop-shadow(0 0 6px rgb(255 216 77 / 0.7));
+}
+
+/* The plank that would finish a line: lashed with torch-orange rope. */
+[data-world='jungle'] .spread .cell[data-near] {
+  outline: 3px dashed var(--torch);
+  outline-offset: -6px;
+}
+
+/* Signature move: branding. The plank flares, then the star burns in. */
+[data-world='jungle'] .spread .cell.just-changed {
+  animation: brand-flare 420ms ease-out;
+}
+
+[data-world='jungle'] .spread .cell.just-changed::after {
+  animation: brand-star 420ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes brand-flare {
+  0% {
+    filter: brightness(1.9) saturate(1.4);
+  }
+}
+
+@keyframes brand-star {
+  from {
+    scale: 0.2;
+    rotate: -40deg;
+    opacity: 0;
+  }
+}
+
+/* A claim: every branded plank flares at once, like a camp torch catching. */
+[data-world='jungle'] .spread.event .cell:not([data-state='plain']) {
+  animation: brand-flare 700ms ease-out;
+}
+
+[data-world='jungle'] .spread button.cell:active {
+  transform: translateY(1px);
+}
+
+[data-world='jungle'] .spread.compact {
+  gap: 3px;
+}
+
+[data-world='jungle'] .spread.compact .cell {
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border-width: 1px;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ emblem: the camp sign */
+
+[data-world='jungle'] .emblem {
+  position: relative;
+  width: 176px;
+  height: 140px;
+  flex: none;
+}
+
+[data-world='jungle'] .emblem .rope {
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 52px;
+  background: repeating-linear-gradient(180deg, var(--rope) 0 5px, #8a6a3a 5px 7px);
+  border-radius: 2px;
+}
+
+[data-world='jungle'] .emblem .rope-l {
+  left: 38px;
+  transform: rotate(-8deg);
+}
+
+[data-world='jungle'] .emblem .rope-r {
+  right: 38px;
+  transform: rotate(8deg);
+}
+
+[data-world='jungle'] .emblem .plank {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 14px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--cedar);
+  border: 3px solid var(--char);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 4px var(--cedar),
+    inset 0 0 0 5.5px #6b4220,
+    0 10px 24px rgb(0 0 0 / 0.5);
+  transform: rotate(-2deg);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+[data-world='jungle'] .emblem .word {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  color: #2a1508;
+}
+
+[data-world='jungle'] .emblem .star {
+  width: 30px;
+  height: 30px;
+  background: var(--char);
+  -webkit-mask: url('../assets/star.svg') center / contain no-repeat;
+  mask: url('../assets/star.svg') center / contain no-repeat;
+}
+
+[data-world='jungle'].door:hover .emblem .plank,
+[data-world='jungle'].door:focus-visible .emblem .plank {
+  transform: rotate(2deg);
+}
+
+/* ------------------------------------------------------------------ large-screen sidebar: the camp board */
+
+[data-world='jungle'] .rail {
+  background: var(--surface);
+  border: 2px solid var(--char);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+[data-world='jungle'] .rail-head {
+  height: 26px;
+  background: var(--cedar);
+  border-bottom: 3px solid var(--char);
+  box-shadow: inset 0 -4px 0 #6b4220;
+}
+
+[data-world='jungle'] .tally {
+  background: radial-gradient(circle at 50% 40%, #170a04 0 30%, #2c160a 55%, #4a2911 100%);
+  border: 2px solid var(--torch);
+  border-radius: 8px;
+}
+
+[data-world='jungle'] .tally-num span {
+  color: var(--ember);
+}
+
+[data-world='jungle'] .rail .btn {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  [data-world='jungle'] .spread:not(.compact) {
+    max-width: 680px;
+  }
+}
+
+/* Every panel hangs from a cedar lintel. */
+[data-world='jungle'] .card {
+  border: 2px solid var(--char);
+  box-shadow:
+    inset 0 8px 0 var(--cedar),
+    inset 0 10px 0 #6b4220,
+    var(--shadow);
+  padding-top: 28px;
+}

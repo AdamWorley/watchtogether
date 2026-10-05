@@ -1,0 +1,1591 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T13:27:29.334Z",
+  "title": "Design System: WatchTogether",
+  "extensions": {
+    "worlds": [
+      {
+        "slug": "lobby",
+        "selector": ":root",
+        "shows": [
+          "home",
+          "privacy",
+          "not found"
+        ],
+        "displayFace": "system sans (no own face)",
+        "signature": "Doors: each show rendered in its own world via data-world."
+      },
+      {
+        "slug": "traitors",
+        "selector": "[data-world='traitors']",
+        "shows": [
+          "celebrity-traitors",
+          "traitors"
+        ],
+        "displayFace": "IM Fell English SC",
+        "signature": "The turn: rotateY through 90deg in 340ms, colours swap edge-on; LINE inverts the spread for 150ms."
+      },
+      {
+        "slug": "strictly",
+        "selector": "[data-world='strictly']",
+        "shows": [
+          "strictly"
+        ],
+        "displayFace": "Limelight",
+        "signature": "Sewing: per-person sequins (sequins.svg mask) with one 720ms light sweep; claim sweeps column by column."
+      },
+      {
+        "slug": "jungle",
+        "selector": "[data-world='jungle']",
+        "shows": [
+          "im-a-celeb"
+        ],
+        "displayFace": "Rye",
+        "signature": "Branding: 420ms plank flare and a star.svg brand burned in; claim flares every branded plank."
+      },
+      {
+        "slug": "bakeoff",
+        "selector": "[data-world='bakeoff']",
+        "shows": [
+          "bake-off"
+        ],
+        "displayFace": "Leckerli One",
+        "signature": "Sprinkle shower: sprinkles.svg falls in over 460ms; claim reshowers the tray row by row."
+      },
+      {
+        "slug": "ice",
+        "selector": "[data-world='ice']",
+        "shows": [
+          "dancing-on-ice"
+        ],
+        "displayFace": "Righteous",
+        "signature": "The glint: glint.svg spins in over 520ms while a light streak crosses; claim streaks every marked tile."
+      }
+    ],
+    "tokenContract": [
+      "--font-body",
+      "--font-display",
+      "--display-case",
+      "--display-tracking",
+      "--bg",
+      "--surface",
+      "--surface-2",
+      "--text",
+      "--muted",
+      "--border",
+      "--accent",
+      "--accent-text",
+      "--danger",
+      "--ok",
+      "--focus",
+      "--selection",
+      "--radius",
+      "--radius-control",
+      "--radius-input",
+      "--keyline",
+      "--shadow",
+      "--btn-tracking",
+      "--btn-size",
+      "--btn-small-size",
+      "--btn-weight",
+      "--c0",
+      "--c1",
+      "--c2",
+      "--c3",
+      "--c4",
+      "--c5",
+      "--gutter"
+    ],
+    "stateAttributes": {
+      "data-world": "world on <html> or a home door",
+      "data-state": "plain | marked | free | win",
+      "data-near": "empty tile that completes a 4/5 line",
+      "data-c": "0-5 per-person colour slot -> --person",
+      "data-tab": "card | chat | people (phones)",
+      ".just-changed": "signature move on the tile just toggled",
+      ".event": "full-card claim moment",
+      ".fit-1/.fit-2/.fit-3": "caption steps 0.9 / 0.82 / 0.75em from lib/fit.ts"
+    },
+    "constraints": [
+      "Strict CSP: no inline styles, no external fonts",
+      "Trusted Types",
+      "First-load JS budget 60 KB gzip",
+      "State never by colour alone",
+      "Captions never cross a tile frame or split a word without a hyphen (lib/fit.ts, test/e2e/captions.spec.ts)"
+    ],
+    "colorMeta": {
+      "lobby-charcoal": {
+        "role": "neutral",
+        "world": "lobby",
+        "displayName": "Lobby Charcoal",
+        "canonical": "#121214",
+        "oklch": "oklch(18.3% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.004 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(37% 0.004 286)",
+          "oklch(48% 0.004 286)",
+          "oklch(59% 0.004 286)",
+          "oklch(70% 0.004 286)",
+          "oklch(82% 0.004 286)",
+          "oklch(95% 0.004 286)"
+        ]
+      },
+      "lobby-surface": {
+        "role": "neutral",
+        "world": "lobby",
+        "displayName": "Lobby Surface",
+        "canonical": "#1b1b1f",
+        "oklch": "oklch(22.4% 0.008 285.8)",
+        "tonalRamp": [
+          "oklch(15% 0.008 285.8)",
+          "oklch(26% 0.008 285.8)",
+          "oklch(37% 0.008 285.8)",
+          "oklch(48% 0.008 285.8)",
+          "oklch(59% 0.008 285.8)",
+          "oklch(70% 0.008 285.8)",
+          "oklch(82% 0.008 285.8)",
+          "oklch(95% 0.008 285.8)"
+        ]
+      },
+      "lobby-surface-raised": {
+        "role": "tertiary",
+        "world": "lobby",
+        "displayName": "Lobby Surface Raised",
+        "canonical": "#26262b",
+        "oklch": "oklch(27.1% 0.009 285.8)",
+        "tonalRamp": [
+          "oklch(15% 0.009 285.8)",
+          "oklch(26% 0.009 285.8)",
+          "oklch(37% 0.009 285.8)",
+          "oklch(48% 0.009 285.8)",
+          "oklch(59% 0.009 285.8)",
+          "oklch(70% 0.009 285.8)",
+          "oklch(82% 0.009 285.8)",
+          "oklch(95% 0.009 285.8)"
+        ]
+      },
+      "lobby-bone": {
+        "role": "primary",
+        "world": "lobby",
+        "displayName": "Lobby Bone",
+        "canonical": "#f1efe9",
+        "oklch": "oklch(95.2% 0.008 91.5)",
+        "tonalRamp": [
+          "oklch(15% 0.008 91.5)",
+          "oklch(26% 0.008 91.5)",
+          "oklch(37% 0.008 91.5)",
+          "oklch(48% 0.008 91.5)",
+          "oklch(59% 0.008 91.5)",
+          "oklch(70% 0.008 91.5)",
+          "oklch(82% 0.008 91.5)",
+          "oklch(95% 0.008 91.5)"
+        ]
+      },
+      "lobby-muted": {
+        "role": "neutral",
+        "world": "lobby",
+        "displayName": "Lobby Muted",
+        "canonical": "#aaa69e",
+        "oklch": "oklch(72.6% 0.012 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.012 84.6)",
+          "oklch(26% 0.012 84.6)",
+          "oklch(37% 0.012 84.6)",
+          "oklch(48% 0.012 84.6)",
+          "oklch(59% 0.012 84.6)",
+          "oklch(70% 0.012 84.6)",
+          "oklch(82% 0.012 84.6)",
+          "oklch(95% 0.012 84.6)"
+        ]
+      },
+      "lobby-border": {
+        "role": "neutral",
+        "world": "lobby",
+        "displayName": "Lobby Border",
+        "canonical": "#34343b",
+        "oklch": "oklch(32.8% 0.012 285.7)",
+        "tonalRamp": [
+          "oklch(15% 0.012 285.7)",
+          "oklch(26% 0.012 285.7)",
+          "oklch(37% 0.012 285.7)",
+          "oklch(48% 0.012 285.7)",
+          "oklch(59% 0.012 285.7)",
+          "oklch(70% 0.012 285.7)",
+          "oklch(82% 0.012 285.7)",
+          "oklch(95% 0.012 285.7)"
+        ]
+      },
+      "lobby-danger": {
+        "role": "danger",
+        "world": "lobby",
+        "displayName": "Lobby Danger",
+        "canonical": "#ff7b6e",
+        "oklch": "oklch(73.4% 0.163 27.5)",
+        "tonalRamp": [
+          "oklch(15% 0.163 27.5)",
+          "oklch(26% 0.163 27.5)",
+          "oklch(37% 0.163 27.5)",
+          "oklch(48% 0.163 27.5)",
+          "oklch(59% 0.163 27.5)",
+          "oklch(70% 0.163 27.5)",
+          "oklch(82% 0.163 27.5)",
+          "oklch(95% 0.163 27.5)"
+        ]
+      },
+      "lobby-ok": {
+        "role": "success",
+        "world": "lobby",
+        "displayName": "Lobby Ok",
+        "canonical": "#6fd39a",
+        "oklch": "oklch(79.1% 0.126 156.9)",
+        "tonalRamp": [
+          "oklch(15% 0.126 156.9)",
+          "oklch(26% 0.126 156.9)",
+          "oklch(37% 0.126 156.9)",
+          "oklch(48% 0.126 156.9)",
+          "oklch(59% 0.126 156.9)",
+          "oklch(70% 0.126 156.9)",
+          "oklch(82% 0.126 156.9)",
+          "oklch(95% 0.126 156.9)"
+        ]
+      },
+      "on-air-red": {
+        "role": "tertiary",
+        "world": "lobby",
+        "displayName": "On Air Red",
+        "canonical": "#e3261b",
+        "oklch": "oklch(58.9% 0.222 29.3)",
+        "tonalRamp": [
+          "oklch(15% 0.222 29.3)",
+          "oklch(26% 0.222 29.3)",
+          "oklch(37% 0.222 29.3)",
+          "oklch(48% 0.222 29.3)",
+          "oklch(59% 0.222 29.3)",
+          "oklch(70% 0.222 29.3)",
+          "oklch(82% 0.222 29.3)",
+          "oklch(95% 0.222 29.3)"
+        ]
+      },
+      "reading-cloth-indigo": {
+        "role": "neutral",
+        "world": "traitors",
+        "displayName": "Reading Cloth Indigo",
+        "canonical": "#17142e",
+        "oklch": "oklch(21% 0.05 286.5)",
+        "tonalRamp": [
+          "oklch(15% 0.05 286.5)",
+          "oklch(26% 0.05 286.5)",
+          "oklch(37% 0.05 286.5)",
+          "oklch(48% 0.05 286.5)",
+          "oklch(59% 0.05 286.5)",
+          "oklch(70% 0.05 286.5)",
+          "oklch(82% 0.05 286.5)",
+          "oklch(95% 0.05 286.5)"
+        ]
+      },
+      "traitors-surface": {
+        "role": "neutral",
+        "world": "traitors",
+        "displayName": "Traitors Surface",
+        "canonical": "#201c3f",
+        "oklch": "oklch(25.1% 0.064 286)",
+        "tonalRamp": [
+          "oklch(15% 0.064 286)",
+          "oklch(26% 0.064 286)",
+          "oklch(37% 0.064 286)",
+          "oklch(48% 0.064 286)",
+          "oklch(59% 0.064 286)",
+          "oklch(70% 0.064 286)",
+          "oklch(82% 0.064 286)",
+          "oklch(95% 0.064 286)"
+        ]
+      },
+      "traitors-surface-raised": {
+        "role": "tertiary",
+        "world": "traitors",
+        "displayName": "Traitors Surface Raised",
+        "canonical": "#2a2552",
+        "oklch": "oklch(29.6% 0.079 285.5)",
+        "tonalRamp": [
+          "oklch(15% 0.079 285.5)",
+          "oklch(26% 0.079 285.5)",
+          "oklch(37% 0.079 285.5)",
+          "oklch(48% 0.079 285.5)",
+          "oklch(59% 0.079 285.5)",
+          "oklch(70% 0.079 285.5)",
+          "oklch(82% 0.079 285.5)",
+          "oklch(95% 0.079 285.5)"
+        ]
+      },
+      "traitors-text": {
+        "role": "neutral",
+        "world": "traitors",
+        "displayName": "Traitors Text",
+        "canonical": "#ece5d3",
+        "oklch": "oklch(92.3% 0.025 89.2)",
+        "tonalRamp": [
+          "oklch(15% 0.025 89.2)",
+          "oklch(26% 0.025 89.2)",
+          "oklch(37% 0.025 89.2)",
+          "oklch(48% 0.025 89.2)",
+          "oklch(59% 0.025 89.2)",
+          "oklch(70% 0.025 89.2)",
+          "oklch(82% 0.025 89.2)",
+          "oklch(95% 0.025 89.2)"
+        ]
+      },
+      "traitors-muted": {
+        "role": "neutral",
+        "world": "traitors",
+        "displayName": "Traitors Muted",
+        "canonical": "#b3abc6",
+        "oklch": "oklch(75.7% 0.039 299)",
+        "tonalRamp": [
+          "oklch(15% 0.039 299)",
+          "oklch(26% 0.039 299)",
+          "oklch(37% 0.039 299)",
+          "oklch(48% 0.039 299)",
+          "oklch(59% 0.039 299)",
+          "oklch(70% 0.039 299)",
+          "oklch(82% 0.039 299)",
+          "oklch(95% 0.039 299)"
+        ]
+      },
+      "tarot-ink": {
+        "role": "neutral",
+        "world": "traitors",
+        "displayName": "Tarot Ink",
+        "canonical": "#0e0b1c",
+        "oklch": "oklch(16.4% 0.035 290.1)",
+        "tonalRamp": [
+          "oklch(15% 0.035 290.1)",
+          "oklch(26% 0.035 290.1)",
+          "oklch(37% 0.035 290.1)",
+          "oklch(48% 0.035 290.1)",
+          "oklch(59% 0.035 290.1)",
+          "oklch(70% 0.035 290.1)",
+          "oklch(82% 0.035 290.1)",
+          "oklch(95% 0.035 290.1)"
+        ]
+      },
+      "tarot-bone": {
+        "role": "secondary",
+        "world": "traitors",
+        "displayName": "Tarot Bone",
+        "canonical": "#e6dfcd",
+        "oklch": "oklch(90.4% 0.025 89.2)",
+        "tonalRamp": [
+          "oklch(15% 0.025 89.2)",
+          "oklch(26% 0.025 89.2)",
+          "oklch(37% 0.025 89.2)",
+          "oklch(48% 0.025 89.2)",
+          "oklch(59% 0.025 89.2)",
+          "oklch(70% 0.025 89.2)",
+          "oklch(82% 0.025 89.2)",
+          "oklch(95% 0.025 89.2)"
+        ]
+      },
+      "stencil-vermilion": {
+        "role": "secondary",
+        "world": "traitors",
+        "displayName": "Stencil Vermilion",
+        "canonical": "#d8402b",
+        "oklch": "oklch(59.1% 0.192 31.1)",
+        "tonalRamp": [
+          "oklch(15% 0.192 31.1)",
+          "oklch(26% 0.192 31.1)",
+          "oklch(37% 0.192 31.1)",
+          "oklch(48% 0.192 31.1)",
+          "oklch(59% 0.192 31.1)",
+          "oklch(70% 0.192 31.1)",
+          "oklch(82% 0.192 31.1)",
+          "oklch(95% 0.192 31.1)"
+        ]
+      },
+      "stencil-ultramarine": {
+        "role": "secondary",
+        "world": "traitors",
+        "displayName": "Stencil Ultramarine",
+        "canonical": "#2c4bb0",
+        "oklch": "oklch(45.2% 0.165 266.7)",
+        "tonalRamp": [
+          "oklch(15% 0.165 266.7)",
+          "oklch(26% 0.165 266.7)",
+          "oklch(37% 0.165 266.7)",
+          "oklch(48% 0.165 266.7)",
+          "oklch(59% 0.165 266.7)",
+          "oklch(70% 0.165 266.7)",
+          "oklch(82% 0.165 266.7)",
+          "oklch(95% 0.165 266.7)"
+        ]
+      },
+      "chrome-yellow": {
+        "role": "primary",
+        "world": "traitors",
+        "displayName": "Chrome Yellow",
+        "canonical": "#f2c230",
+        "oklch": "oklch(83.4% 0.158 89)",
+        "tonalRamp": [
+          "oklch(15% 0.158 89)",
+          "oklch(26% 0.158 89)",
+          "oklch(37% 0.158 89)",
+          "oklch(48% 0.158 89)",
+          "oklch(59% 0.158 89)",
+          "oklch(70% 0.158 89)",
+          "oklch(82% 0.158 89)",
+          "oklch(95% 0.158 89)"
+        ]
+      },
+      "velvet-plum": {
+        "role": "neutral",
+        "world": "strictly",
+        "displayName": "Velvet Plum",
+        "canonical": "#140a1f",
+        "oklch": "oklch(17.2% 0.044 304.1)",
+        "tonalRamp": [
+          "oklch(15% 0.044 304.1)",
+          "oklch(26% 0.044 304.1)",
+          "oklch(37% 0.044 304.1)",
+          "oklch(48% 0.044 304.1)",
+          "oklch(59% 0.044 304.1)",
+          "oklch(70% 0.044 304.1)",
+          "oklch(82% 0.044 304.1)",
+          "oklch(95% 0.044 304.1)"
+        ]
+      },
+      "strictly-surface": {
+        "role": "neutral",
+        "world": "strictly",
+        "displayName": "Strictly Surface",
+        "canonical": "#1e1029",
+        "oklch": "oklch(20.6% 0.051 308.4)",
+        "tonalRamp": [
+          "oklch(15% 0.051 308.4)",
+          "oklch(26% 0.051 308.4)",
+          "oklch(37% 0.051 308.4)",
+          "oklch(48% 0.051 308.4)",
+          "oklch(59% 0.051 308.4)",
+          "oklch(70% 0.051 308.4)",
+          "oklch(82% 0.051 308.4)",
+          "oklch(95% 0.051 308.4)"
+        ]
+      },
+      "chiffon-panel": {
+        "role": "tertiary",
+        "world": "strictly",
+        "displayName": "Chiffon Panel",
+        "canonical": "#26142f",
+        "oklch": "oklch(23% 0.055 313.5)",
+        "tonalRamp": [
+          "oklch(15% 0.055 313.5)",
+          "oklch(26% 0.055 313.5)",
+          "oklch(37% 0.055 313.5)",
+          "oklch(48% 0.055 313.5)",
+          "oklch(59% 0.055 313.5)",
+          "oklch(70% 0.055 313.5)",
+          "oklch(82% 0.055 313.5)",
+          "oklch(95% 0.055 313.5)"
+        ]
+      },
+      "strictly-text": {
+        "role": "neutral",
+        "world": "strictly",
+        "displayName": "Strictly Text",
+        "canonical": "#f7f2ff",
+        "oklch": "oklch(96.9% 0.018 303.4)",
+        "tonalRamp": [
+          "oklch(15% 0.018 303.4)",
+          "oklch(26% 0.018 303.4)",
+          "oklch(37% 0.018 303.4)",
+          "oklch(48% 0.018 303.4)",
+          "oklch(59% 0.018 303.4)",
+          "oklch(70% 0.018 303.4)",
+          "oklch(82% 0.018 303.4)",
+          "oklch(95% 0.018 303.4)"
+        ]
+      },
+      "strictly-muted": {
+        "role": "neutral",
+        "world": "strictly",
+        "displayName": "Strictly Muted",
+        "canonical": "#c3b2dc",
+        "oklch": "oklch(79.2% 0.061 303.4)",
+        "tonalRamp": [
+          "oklch(15% 0.061 303.4)",
+          "oklch(26% 0.061 303.4)",
+          "oklch(37% 0.061 303.4)",
+          "oklch(48% 0.061 303.4)",
+          "oklch(59% 0.061 303.4)",
+          "oklch(70% 0.061 303.4)",
+          "oklch(82% 0.061 303.4)",
+          "oklch(95% 0.061 303.4)"
+        ]
+      },
+      "strictly-border": {
+        "role": "neutral",
+        "world": "strictly",
+        "displayName": "Strictly Border",
+        "canonical": "#3d2552",
+        "oklch": "oklch(31.7% 0.082 307)",
+        "tonalRamp": [
+          "oklch(15% 0.082 307)",
+          "oklch(26% 0.082 307)",
+          "oklch(37% 0.082 307)",
+          "oklch(48% 0.082 307)",
+          "oklch(59% 0.082 307)",
+          "oklch(70% 0.082 307)",
+          "oklch(82% 0.082 307)",
+          "oklch(95% 0.082 307)"
+        ]
+      },
+      "costume-fuchsia": {
+        "role": "primary",
+        "world": "strictly",
+        "displayName": "Costume Fuchsia",
+        "canonical": "#ff2e93",
+        "oklch": "oklch(66.5% 0.248 358.1)",
+        "tonalRamp": [
+          "oklch(15% 0.248 358.1)",
+          "oklch(26% 0.248 358.1)",
+          "oklch(37% 0.248 358.1)",
+          "oklch(48% 0.248 358.1)",
+          "oklch(59% 0.248 358.1)",
+          "oklch(70% 0.248 358.1)",
+          "oklch(82% 0.248 358.1)",
+          "oklch(95% 0.248 358.1)"
+        ]
+      },
+      "costume-turquoise": {
+        "role": "tertiary",
+        "world": "strictly",
+        "displayName": "Costume Turquoise",
+        "canonical": "#19d3c5",
+        "oklch": "oklch(78.2% 0.134 186.3)",
+        "tonalRamp": [
+          "oklch(15% 0.134 186.3)",
+          "oklch(26% 0.134 186.3)",
+          "oklch(37% 0.134 186.3)",
+          "oklch(48% 0.134 186.3)",
+          "oklch(59% 0.134 186.3)",
+          "oklch(70% 0.134 186.3)",
+          "oklch(82% 0.134 186.3)",
+          "oklch(95% 0.134 186.3)"
+        ]
+      },
+      "costume-flame": {
+        "role": "tertiary",
+        "world": "strictly",
+        "displayName": "Costume Flame",
+        "canonical": "#ff7a1a",
+        "oklch": "oklch(72.4% 0.187 48.9)",
+        "tonalRamp": [
+          "oklch(15% 0.187 48.9)",
+          "oklch(26% 0.187 48.9)",
+          "oklch(37% 0.187 48.9)",
+          "oklch(48% 0.187 48.9)",
+          "oklch(59% 0.187 48.9)",
+          "oklch(70% 0.187 48.9)",
+          "oklch(82% 0.187 48.9)",
+          "oklch(95% 0.187 48.9)"
+        ]
+      },
+      "gold-lame": {
+        "role": "secondary",
+        "world": "strictly",
+        "displayName": "Gold Lame",
+        "canonical": "#f5c542",
+        "oklch": "oklch(84.4% 0.151 87.9)",
+        "tonalRamp": [
+          "oklch(15% 0.151 87.9)",
+          "oklch(26% 0.151 87.9)",
+          "oklch(37% 0.151 87.9)",
+          "oklch(48% 0.151 87.9)",
+          "oklch(59% 0.151 87.9)",
+          "oklch(70% 0.151 87.9)",
+          "oklch(82% 0.151 87.9)",
+          "oklch(95% 0.151 87.9)"
+        ]
+      },
+      "costume-emerald": {
+        "role": "tertiary",
+        "world": "strictly",
+        "displayName": "Costume Emerald",
+        "canonical": "#23c06b",
+        "oklch": "oklch(71.2% 0.174 153)",
+        "tonalRamp": [
+          "oklch(15% 0.174 153)",
+          "oklch(26% 0.174 153)",
+          "oklch(37% 0.174 153)",
+          "oklch(48% 0.174 153)",
+          "oklch(59% 0.174 153)",
+          "oklch(70% 0.174 153)",
+          "oklch(82% 0.174 153)",
+          "oklch(95% 0.174 153)"
+        ]
+      },
+      "costume-violet": {
+        "role": "tertiary",
+        "world": "strictly",
+        "displayName": "Costume Violet",
+        "canonical": "#a678ff",
+        "oklch": "oklch(67.9% 0.193 296.6)",
+        "tonalRamp": [
+          "oklch(15% 0.193 296.6)",
+          "oklch(26% 0.193 296.6)",
+          "oklch(37% 0.193 296.6)",
+          "oklch(48% 0.193 296.6)",
+          "oklch(59% 0.193 296.6)",
+          "oklch(70% 0.193 296.6)",
+          "oklch(82% 0.193 296.6)",
+          "oklch(95% 0.193 296.6)"
+        ]
+      },
+      "jungle-night": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Jungle Night",
+        "canonical": "#0c1710",
+        "oklch": "oklch(19.1% 0.021 155.9)",
+        "tonalRamp": [
+          "oklch(15% 0.021 155.9)",
+          "oklch(26% 0.021 155.9)",
+          "oklch(37% 0.021 155.9)",
+          "oklch(48% 0.021 155.9)",
+          "oklch(59% 0.021 155.9)",
+          "oklch(70% 0.021 155.9)",
+          "oklch(82% 0.021 155.9)",
+          "oklch(95% 0.021 155.9)"
+        ]
+      },
+      "jungle-surface": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Jungle Surface",
+        "canonical": "#14231a",
+        "oklch": "oklch(23.9% 0.027 157.3)",
+        "tonalRamp": [
+          "oklch(15% 0.027 157.3)",
+          "oklch(26% 0.027 157.3)",
+          "oklch(37% 0.027 157.3)",
+          "oklch(48% 0.027 157.3)",
+          "oklch(59% 0.027 157.3)",
+          "oklch(70% 0.027 157.3)",
+          "oklch(82% 0.027 157.3)",
+          "oklch(95% 0.027 157.3)"
+        ]
+      },
+      "jungle-text": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Jungle Text",
+        "canonical": "#f3ead8",
+        "oklch": "oklch(93.9% 0.026 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.026 84.6)",
+          "oklch(26% 0.026 84.6)",
+          "oklch(37% 0.026 84.6)",
+          "oklch(48% 0.026 84.6)",
+          "oklch(59% 0.026 84.6)",
+          "oklch(70% 0.026 84.6)",
+          "oklch(82% 0.026 84.6)",
+          "oklch(95% 0.026 84.6)"
+        ]
+      },
+      "jungle-muted": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Jungle Muted",
+        "canonical": "#b9c2a8",
+        "oklch": "oklch(80% 0.037 122.8)",
+        "tonalRamp": [
+          "oklch(15% 0.037 122.8)",
+          "oklch(26% 0.037 122.8)",
+          "oklch(37% 0.037 122.8)",
+          "oklch(48% 0.037 122.8)",
+          "oklch(59% 0.037 122.8)",
+          "oklch(70% 0.037 122.8)",
+          "oklch(82% 0.037 122.8)",
+          "oklch(95% 0.037 122.8)"
+        ]
+      },
+      "camp-cedar": {
+        "role": "secondary",
+        "world": "jungle",
+        "displayName": "Camp Cedar",
+        "canonical": "#a8743d",
+        "oklch": "oklch(60.1% 0.097 65.6)",
+        "tonalRamp": [
+          "oklch(15% 0.097 65.6)",
+          "oklch(26% 0.097 65.6)",
+          "oklch(37% 0.097 65.6)",
+          "oklch(48% 0.097 65.6)",
+          "oklch(59% 0.097 65.6)",
+          "oklch(70% 0.097 65.6)",
+          "oklch(82% 0.097 65.6)",
+          "oklch(95% 0.097 65.6)"
+        ]
+      },
+      "char-keyline": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Char Keyline",
+        "canonical": "#2e1b0e",
+        "oklch": "oklch(24.4% 0.038 54.4)",
+        "tonalRamp": [
+          "oklch(15% 0.038 54.4)",
+          "oklch(26% 0.038 54.4)",
+          "oklch(37% 0.038 54.4)",
+          "oklch(48% 0.038 54.4)",
+          "oklch(59% 0.038 54.4)",
+          "oklch(70% 0.038 54.4)",
+          "oklch(82% 0.038 54.4)",
+          "oklch(95% 0.038 54.4)"
+        ]
+      },
+      "pinstripe-brown": {
+        "role": "secondary",
+        "world": "jungle",
+        "displayName": "Pinstripe Brown",
+        "canonical": "#6b4220",
+        "oklch": "oklch(42% 0.075 58.3)",
+        "tonalRamp": [
+          "oklch(15% 0.075 58.3)",
+          "oklch(26% 0.075 58.3)",
+          "oklch(37% 0.075 58.3)",
+          "oklch(48% 0.075 58.3)",
+          "oklch(59% 0.075 58.3)",
+          "oklch(70% 0.075 58.3)",
+          "oklch(82% 0.075 58.3)",
+          "oklch(95% 0.075 58.3)"
+        ]
+      },
+      "torch-orange": {
+        "role": "primary",
+        "world": "jungle",
+        "displayName": "Torch Orange",
+        "canonical": "#ff8a1f",
+        "oklch": "oklch(74.8% 0.176 55.4)",
+        "tonalRamp": [
+          "oklch(15% 0.176 55.4)",
+          "oklch(26% 0.176 55.4)",
+          "oklch(37% 0.176 55.4)",
+          "oklch(48% 0.176 55.4)",
+          "oklch(59% 0.176 55.4)",
+          "oklch(70% 0.176 55.4)",
+          "oklch(82% 0.176 55.4)",
+          "oklch(95% 0.176 55.4)"
+        ]
+      },
+      "ember-glow": {
+        "role": "tertiary",
+        "world": "jungle",
+        "displayName": "Ember Glow",
+        "canonical": "#ffc46b",
+        "oklch": "oklch(85.6% 0.126 76)",
+        "tonalRamp": [
+          "oklch(15% 0.126 76)",
+          "oklch(26% 0.126 76)",
+          "oklch(37% 0.126 76)",
+          "oklch(48% 0.126 76)",
+          "oklch(59% 0.126 76)",
+          "oklch(70% 0.126 76)",
+          "oklch(82% 0.126 76)",
+          "oklch(95% 0.126 76)"
+        ]
+      },
+      "lashing-rope": {
+        "role": "tertiary",
+        "world": "jungle",
+        "displayName": "Lashing Rope",
+        "canonical": "#cfa86a",
+        "oklch": "oklch(75.3% 0.092 78.3)",
+        "tonalRamp": [
+          "oklch(15% 0.092 78.3)",
+          "oklch(26% 0.092 78.3)",
+          "oklch(37% 0.092 78.3)",
+          "oklch(48% 0.092 78.3)",
+          "oklch(59% 0.092 78.3)",
+          "oklch(70% 0.092 78.3)",
+          "oklch(82% 0.092 78.3)",
+          "oklch(95% 0.092 78.3)"
+        ]
+      },
+      "scorch-core": {
+        "role": "neutral",
+        "world": "jungle",
+        "displayName": "Scorch Core",
+        "canonical": "#170a04",
+        "oklch": "oklch(16.2% 0.027 50.3)",
+        "tonalRamp": [
+          "oklch(15% 0.027 50.3)",
+          "oklch(26% 0.027 50.3)",
+          "oklch(37% 0.027 50.3)",
+          "oklch(48% 0.027 50.3)",
+          "oklch(59% 0.027 50.3)",
+          "oklch(70% 0.027 50.3)",
+          "oklch(82% 0.027 50.3)",
+          "oklch(95% 0.027 50.3)"
+        ]
+      },
+      "brand-burn": {
+        "role": "secondary",
+        "world": "jungle",
+        "displayName": "Brand Burn",
+        "canonical": "#8a3b0f",
+        "oklch": "oklch(45.3% 0.12 44.9)",
+        "tonalRamp": [
+          "oklch(15% 0.12 44.9)",
+          "oklch(26% 0.12 44.9)",
+          "oklch(37% 0.12 44.9)",
+          "oklch(48% 0.12 44.9)",
+          "oklch(59% 0.12 44.9)",
+          "oklch(70% 0.12 44.9)",
+          "oklch(82% 0.12 44.9)",
+          "oklch(95% 0.12 44.9)"
+        ]
+      },
+      "chocolate-ganache": {
+        "role": "neutral",
+        "world": "bakeoff",
+        "displayName": "Chocolate Ganache",
+        "canonical": "#22120c",
+        "oklch": "oklch(20.3% 0.029 41.3)",
+        "tonalRamp": [
+          "oklch(15% 0.029 41.3)",
+          "oklch(26% 0.029 41.3)",
+          "oklch(37% 0.029 41.3)",
+          "oklch(48% 0.029 41.3)",
+          "oklch(59% 0.029 41.3)",
+          "oklch(70% 0.029 41.3)",
+          "oklch(82% 0.029 41.3)",
+          "oklch(95% 0.029 41.3)"
+        ]
+      },
+      "bakeoff-surface": {
+        "role": "neutral",
+        "world": "bakeoff",
+        "displayName": "Bakeoff Surface",
+        "canonical": "#2e1912",
+        "oklch": "oklch(24% 0.036 39.2)",
+        "tonalRamp": [
+          "oklch(15% 0.036 39.2)",
+          "oklch(26% 0.036 39.2)",
+          "oklch(37% 0.036 39.2)",
+          "oklch(48% 0.036 39.2)",
+          "oklch(59% 0.036 39.2)",
+          "oklch(70% 0.036 39.2)",
+          "oklch(82% 0.036 39.2)",
+          "oklch(95% 0.036 39.2)"
+        ]
+      },
+      "bakeoff-text": {
+        "role": "neutral",
+        "world": "bakeoff",
+        "displayName": "Bakeoff Text",
+        "canonical": "#fbefe6",
+        "oklch": "oklch(95.9% 0.018 59.5)",
+        "tonalRamp": [
+          "oklch(15% 0.018 59.5)",
+          "oklch(26% 0.018 59.5)",
+          "oklch(37% 0.018 59.5)",
+          "oklch(48% 0.018 59.5)",
+          "oklch(59% 0.018 59.5)",
+          "oklch(70% 0.018 59.5)",
+          "oklch(82% 0.018 59.5)",
+          "oklch(95% 0.018 59.5)"
+        ]
+      },
+      "bakeoff-muted": {
+        "role": "neutral",
+        "world": "bakeoff",
+        "displayName": "Bakeoff Muted",
+        "canonical": "#d6bfb1",
+        "oklch": "oklch(82% 0.033 53.4)",
+        "tonalRamp": [
+          "oklch(15% 0.033 53.4)",
+          "oklch(26% 0.033 53.4)",
+          "oklch(37% 0.033 53.4)",
+          "oklch(48% 0.033 53.4)",
+          "oklch(59% 0.033 53.4)",
+          "oklch(70% 0.033 53.4)",
+          "oklch(82% 0.033 53.4)",
+          "oklch(95% 0.033 53.4)"
+        ]
+      },
+      "fondant-pink": {
+        "role": "primary",
+        "world": "bakeoff",
+        "displayName": "Fondant Pink",
+        "canonical": "#f6b7c8",
+        "oklch": "oklch(84.2% 0.076 1)",
+        "tonalRamp": [
+          "oklch(15% 0.076 1)",
+          "oklch(26% 0.076 1)",
+          "oklch(37% 0.076 1)",
+          "oklch(48% 0.076 1)",
+          "oklch(59% 0.076 1)",
+          "oklch(70% 0.076 1)",
+          "oklch(82% 0.076 1)",
+          "oklch(95% 0.076 1)"
+        ]
+      },
+      "fondant-mint": {
+        "role": "tertiary",
+        "world": "bakeoff",
+        "displayName": "Fondant Mint",
+        "canonical": "#a8e3cf",
+        "oklch": "oklch(87% 0.066 171.8)",
+        "tonalRamp": [
+          "oklch(15% 0.066 171.8)",
+          "oklch(26% 0.066 171.8)",
+          "oklch(37% 0.066 171.8)",
+          "oklch(48% 0.066 171.8)",
+          "oklch(59% 0.066 171.8)",
+          "oklch(70% 0.066 171.8)",
+          "oklch(82% 0.066 171.8)",
+          "oklch(95% 0.066 171.8)"
+        ]
+      },
+      "fondant-lemon": {
+        "role": "tertiary",
+        "world": "bakeoff",
+        "displayName": "Fondant Lemon",
+        "canonical": "#f6e39a",
+        "oklch": "oklch(91.5% 0.094 95.3)",
+        "tonalRamp": [
+          "oklch(15% 0.094 95.3)",
+          "oklch(26% 0.094 95.3)",
+          "oklch(37% 0.094 95.3)",
+          "oklch(48% 0.094 95.3)",
+          "oklch(59% 0.094 95.3)",
+          "oklch(70% 0.094 95.3)",
+          "oklch(82% 0.094 95.3)",
+          "oklch(95% 0.094 95.3)"
+        ]
+      },
+      "fondant-lavender": {
+        "role": "tertiary",
+        "world": "bakeoff",
+        "displayName": "Fondant Lavender",
+        "canonical": "#cdbcf0",
+        "oklch": "oklch(82.7% 0.074 299.7)",
+        "tonalRamp": [
+          "oklch(15% 0.074 299.7)",
+          "oklch(26% 0.074 299.7)",
+          "oklch(37% 0.074 299.7)",
+          "oklch(48% 0.074 299.7)",
+          "oklch(59% 0.074 299.7)",
+          "oklch(70% 0.074 299.7)",
+          "oklch(82% 0.074 299.7)",
+          "oklch(95% 0.074 299.7)"
+        ]
+      },
+      "royal-icing": {
+        "role": "secondary",
+        "world": "bakeoff",
+        "displayName": "Royal Icing",
+        "canonical": "#fff8f1",
+        "oklch": "oklch(98.3% 0.012 67.7)",
+        "tonalRamp": [
+          "oklch(15% 0.012 67.7)",
+          "oklch(26% 0.012 67.7)",
+          "oklch(37% 0.012 67.7)",
+          "oklch(48% 0.012 67.7)",
+          "oklch(59% 0.012 67.7)",
+          "oklch(70% 0.012 67.7)",
+          "oklch(82% 0.012 67.7)",
+          "oklch(95% 0.012 67.7)"
+        ]
+      },
+      "raspberry-piping": {
+        "role": "tertiary",
+        "world": "bakeoff",
+        "displayName": "Raspberry Piping",
+        "canonical": "#e5466b",
+        "oklch": "oklch(63% 0.195 11.1)",
+        "tonalRamp": [
+          "oklch(15% 0.195 11.1)",
+          "oklch(26% 0.195 11.1)",
+          "oklch(37% 0.195 11.1)",
+          "oklch(48% 0.195 11.1)",
+          "oklch(59% 0.195 11.1)",
+          "oklch(70% 0.195 11.1)",
+          "oklch(82% 0.195 11.1)",
+          "oklch(95% 0.195 11.1)"
+        ]
+      },
+      "gold-leaf": {
+        "role": "tertiary",
+        "world": "bakeoff",
+        "displayName": "Gold Leaf",
+        "canonical": "#e8b04a",
+        "oklch": "oklch(79.1% 0.134 79.5)",
+        "tonalRamp": [
+          "oklch(15% 0.134 79.5)",
+          "oklch(26% 0.134 79.5)",
+          "oklch(37% 0.134 79.5)",
+          "oklch(48% 0.134 79.5)",
+          "oklch(59% 0.134 79.5)",
+          "oklch(70% 0.134 79.5)",
+          "oklch(82% 0.134 79.5)",
+          "oklch(95% 0.134 79.5)"
+        ]
+      },
+      "cocoa": {
+        "role": "neutral",
+        "world": "bakeoff",
+        "displayName": "Cocoa",
+        "canonical": "#3a2016",
+        "oklch": "oklch(27.5% 0.044 41.7)",
+        "tonalRamp": [
+          "oklch(15% 0.044 41.7)",
+          "oklch(26% 0.044 41.7)",
+          "oklch(37% 0.044 41.7)",
+          "oklch(48% 0.044 41.7)",
+          "oklch(59% 0.044 41.7)",
+          "oklch(70% 0.044 41.7)",
+          "oklch(82% 0.044 41.7)",
+          "oklch(95% 0.044 41.7)"
+        ]
+      },
+      "studio-blue": {
+        "role": "neutral",
+        "world": "ice",
+        "displayName": "Studio Blue",
+        "canonical": "#071330",
+        "oklch": "oklch(19.6% 0.061 264.2)",
+        "tonalRamp": [
+          "oklch(15% 0.061 264.2)",
+          "oklch(26% 0.061 264.2)",
+          "oklch(37% 0.061 264.2)",
+          "oklch(48% 0.061 264.2)",
+          "oklch(59% 0.061 264.2)",
+          "oklch(70% 0.061 264.2)",
+          "oklch(82% 0.061 264.2)",
+          "oklch(95% 0.061 264.2)"
+        ]
+      },
+      "ice-surface": {
+        "role": "neutral",
+        "world": "ice",
+        "displayName": "Ice Surface",
+        "canonical": "#0d1f47",
+        "oklch": "oklch(25.1% 0.079 263.5)",
+        "tonalRamp": [
+          "oklch(15% 0.079 263.5)",
+          "oklch(26% 0.079 263.5)",
+          "oklch(37% 0.079 263.5)",
+          "oklch(48% 0.079 263.5)",
+          "oklch(59% 0.079 263.5)",
+          "oklch(70% 0.079 263.5)",
+          "oklch(82% 0.079 263.5)",
+          "oklch(95% 0.079 263.5)"
+        ]
+      },
+      "ice-text": {
+        "role": "neutral",
+        "world": "ice",
+        "displayName": "Ice Text",
+        "canonical": "#ecf6ff",
+        "oklch": "oklch(96.8% 0.016 245.1)",
+        "tonalRamp": [
+          "oklch(15% 0.016 245.1)",
+          "oklch(26% 0.016 245.1)",
+          "oklch(37% 0.016 245.1)",
+          "oklch(48% 0.016 245.1)",
+          "oklch(59% 0.016 245.1)",
+          "oklch(70% 0.016 245.1)",
+          "oklch(82% 0.016 245.1)",
+          "oklch(95% 0.016 245.1)"
+        ]
+      },
+      "ice-muted": {
+        "role": "neutral",
+        "world": "ice",
+        "displayName": "Ice Muted",
+        "canonical": "#a9bddc",
+        "oklch": "oklch(79.3% 0.049 259.1)",
+        "tonalRamp": [
+          "oklch(15% 0.049 259.1)",
+          "oklch(26% 0.049 259.1)",
+          "oklch(37% 0.049 259.1)",
+          "oklch(48% 0.049 259.1)",
+          "oklch(59% 0.049 259.1)",
+          "oklch(70% 0.049 259.1)",
+          "oklch(82% 0.049 259.1)",
+          "oklch(95% 0.049 259.1)"
+        ]
+      },
+      "ice-border": {
+        "role": "neutral",
+        "world": "ice",
+        "displayName": "Ice Border",
+        "canonical": "#22406f",
+        "oklch": "oklch(37.4% 0.089 259.1)",
+        "tonalRamp": [
+          "oklch(15% 0.089 259.1)",
+          "oklch(26% 0.089 259.1)",
+          "oklch(37% 0.089 259.1)",
+          "oklch(48% 0.089 259.1)",
+          "oklch(59% 0.089 259.1)",
+          "oklch(70% 0.089 259.1)",
+          "oklch(82% 0.089 259.1)",
+          "oklch(95% 0.089 259.1)"
+        ]
+      },
+      "rink-blue": {
+        "role": "tertiary",
+        "world": "ice",
+        "displayName": "Rink Blue",
+        "canonical": "#10305c",
+        "oklch": "oklch(31.2% 0.087 257.3)",
+        "tonalRamp": [
+          "oklch(15% 0.087 257.3)",
+          "oklch(26% 0.087 257.3)",
+          "oklch(37% 0.087 257.3)",
+          "oklch(48% 0.087 257.3)",
+          "oklch(59% 0.087 257.3)",
+          "oklch(70% 0.087 257.3)",
+          "oklch(82% 0.087 257.3)",
+          "oklch(95% 0.087 257.3)"
+        ]
+      },
+      "rink-edge": {
+        "role": "tertiary",
+        "world": "ice",
+        "displayName": "Rink Edge",
+        "canonical": "#2b5a94",
+        "oklch": "oklch(46.4% 0.108 255)",
+        "tonalRamp": [
+          "oklch(15% 0.108 255)",
+          "oklch(26% 0.108 255)",
+          "oklch(37% 0.108 255)",
+          "oklch(48% 0.108 255)",
+          "oklch(59% 0.108 255)",
+          "oklch(70% 0.108 255)",
+          "oklch(82% 0.108 255)",
+          "oklch(95% 0.108 255)"
+        ]
+      },
+      "frost": {
+        "role": "tertiary",
+        "world": "ice",
+        "displayName": "Frost",
+        "canonical": "#8fd3ff",
+        "oklch": "oklch(83.7% 0.092 237.7)",
+        "tonalRamp": [
+          "oklch(15% 0.092 237.7)",
+          "oklch(26% 0.092 237.7)",
+          "oklch(37% 0.092 237.7)",
+          "oklch(48% 0.092 237.7)",
+          "oklch(59% 0.092 237.7)",
+          "oklch(70% 0.092 237.7)",
+          "oklch(82% 0.092 237.7)",
+          "oklch(95% 0.092 237.7)"
+        ]
+      },
+      "ice-cyan": {
+        "role": "primary",
+        "world": "ice",
+        "displayName": "Ice Cyan",
+        "canonical": "#5ee7ff",
+        "oklch": "oklch(86.2% 0.122 211.1)",
+        "tonalRamp": [
+          "oklch(15% 0.122 211.1)",
+          "oklch(26% 0.122 211.1)",
+          "oklch(37% 0.122 211.1)",
+          "oklch(48% 0.122 211.1)",
+          "oklch(59% 0.122 211.1)",
+          "oklch(70% 0.122 211.1)",
+          "oklch(82% 0.122 211.1)",
+          "oklch(95% 0.122 211.1)"
+        ]
+      },
+      "bolero-violet": {
+        "role": "secondary",
+        "world": "ice",
+        "displayName": "Bolero Violet",
+        "canonical": "#7a3cf0",
+        "oklch": "oklch(54.4% 0.248 291.6)",
+        "tonalRamp": [
+          "oklch(15% 0.248 291.6)",
+          "oklch(26% 0.248 291.6)",
+          "oklch(37% 0.248 291.6)",
+          "oklch(48% 0.248 291.6)",
+          "oklch(59% 0.248 291.6)",
+          "oklch(70% 0.248 291.6)",
+          "oklch(82% 0.248 291.6)",
+          "oklch(95% 0.248 291.6)"
+        ]
+      },
+      "perfect-score-gold": {
+        "role": "tertiary",
+        "world": "ice",
+        "displayName": "Perfect Score Gold",
+        "canonical": "#ffcc33",
+        "oklch": "oklch(86.7% 0.165 88.7)",
+        "tonalRamp": [
+          "oklch(15% 0.165 88.7)",
+          "oklch(26% 0.165 88.7)",
+          "oklch(37% 0.165 88.7)",
+          "oklch(48% 0.165 88.7)",
+          "oklch(59% 0.165 88.7)",
+          "oklch(70% 0.165 88.7)",
+          "oklch(82% 0.165 88.7)",
+          "oklch(95% 0.165 88.7)"
+        ]
+      },
+      "bevel-silver": {
+        "role": "tertiary",
+        "world": "ice",
+        "displayName": "Bevel Silver",
+        "canonical": "#dfe8f5",
+        "oklch": "oklch(92.8% 0.02 257.5)",
+        "tonalRamp": [
+          "oklch(15% 0.02 257.5)",
+          "oklch(26% 0.02 257.5)",
+          "oklch(37% 0.02 257.5)",
+          "oklch(48% 0.02 257.5)",
+          "oklch(59% 0.02 257.5)",
+          "oklch(70% 0.02 257.5)",
+          "oklch(82% 0.02 257.5)",
+          "oklch(95% 0.02 257.5)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page titles (h1) in the world display face."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Panel headings (h2)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Door names and minor headings (h3)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All reading text, chat and meta, in every world."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Form labels; Traitors sets them in its display face."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Buttons and tabs in the display face; world --btn-* tune size, weight, tracking."
+      },
+      "tile-caption": {
+        "displayName": "Tile Caption",
+        "purpose": "The single caption size inside a bingo card; steps down via fit-1..3 only to fit the widest unbreakable word."
+      },
+      "room-code": {
+        "displayName": "Room Code",
+        "purpose": "Room code plates only."
+      },
+      "display-traitors": {
+        "displayName": "IM Fell English SC",
+        "purpose": "Traitors display face; sets the whole ladder."
+      },
+      "display-strictly": {
+        "displayName": "Limelight",
+        "purpose": "Strictly headings, scores, calls."
+      },
+      "display-jungle": {
+        "displayName": "Rye",
+        "purpose": "I’m a Celeb headings, buttons, free plank."
+      },
+      "display-bakeoff": {
+        "displayName": "Leckerli One",
+        "purpose": "Bake Off headings, buttons, rosette."
+      },
+      "display-ice": {
+        "displayName": "Righteous",
+        "purpose": "Dancing on Ice headings, buttons, score; silver with offset bevel on h1/h2."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lobby-panel",
+        "value": "0 2px 4px rgb(0 0 0 / 0.25), 0 12px 32px rgb(0 0 0 / 0.3)",
+        "purpose": "Default --shadow for panels and doors."
+      },
+      {
+        "name": "traitors-panel",
+        "value": "0 2px 0 rgb(0 0 0 / 0.45), 0 10px 24px rgb(5 3 15 / 0.55)",
+        "purpose": "Traitors --shadow."
+      },
+      {
+        "name": "strictly-panel",
+        "value": "0 2px 6px rgb(0 0 0 / 0.35), 0 18px 40px rgb(6 0 14 / 0.55)",
+        "purpose": "Strictly --shadow."
+      },
+      {
+        "name": "jungle-panel",
+        "value": "0 2px 0 rgb(0 0 0 / 0.4), 0 14px 30px rgb(0 0 0 / 0.5)",
+        "purpose": "I’m a Celeb --shadow."
+      },
+      {
+        "name": "bakeoff-panel",
+        "value": "0 2px 6px rgb(0 0 0 / 0.35), 0 16px 34px rgb(10 3 0 / 0.5)",
+        "purpose": "Bake Off --shadow."
+      },
+      {
+        "name": "ice-panel",
+        "value": "0 2px 6px rgb(0 0 0 / 0.4), 0 18px 40px rgb(0 4 20 / 0.55)",
+        "purpose": "Dancing on Ice --shadow."
+      },
+      {
+        "name": "tarot-keyline",
+        "value": "inset 0 0 0 3px #e6dfcd, inset 0 0 0 4.5px #0e0b1c, 0 2px 0 rgb(0 0 0 / 0.5), 0 8px 16px rgb(5 3 15 / 0.45)",
+        "purpose": "Traitors tile: printed inner frame plus card thickness."
+      },
+      {
+        "name": "plank-pinstripe",
+        "value": "inset 0 0 0 3px #a8743d, inset 0 0 0 4.5px #6b4220, 0 4px 10px rgb(0 0 0 / 0.4)",
+        "purpose": "Jungle plank: painter’s pinstripe."
+      },
+      {
+        "name": "live-door-glow",
+        "value": "0 2px 6px rgb(0 0 0 / 0.35), 0 24px 60px color-mix(in srgb, var(--accent) 22%, transparent)",
+        "purpose": "Lobby door whose show is on air."
+      }
+    ],
+    "motion": [
+      {
+        "name": "button-press",
+        "value": "transform 0.08s ease-out, filter 0.15s ease-out",
+        "purpose": "Button hover brighten and 1px press."
+      },
+      {
+        "name": "door-lift",
+        "value": "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Home door lifts 4px; emblems use the same curve over 0.4s."
+      },
+      {
+        "name": "tarot-turn",
+        "value": "340ms cubic-bezier(0.45, 0, 0.25, 1)",
+        "purpose": "Traitors mark; colour swap delayed 170ms."
+      },
+      {
+        "name": "tarot-invert",
+        "value": "150ms steps(1, end)",
+        "purpose": "Traitors LINE claim."
+      },
+      {
+        "name": "sequin-sweep",
+        "value": "720ms cubic-bezier(0.25, 0.6, 0.3, 1)",
+        "purpose": "Strictly mark; 60ms column stagger on claim."
+      },
+      {
+        "name": "rhinestone-glint",
+        "value": "1.6s ease-in-out x2",
+        "purpose": "Strictly near-line; stops after two pulses."
+      },
+      {
+        "name": "brand-star",
+        "value": "420ms cubic-bezier(0.2, 1.4, 0.4, 1)",
+        "purpose": "Jungle mark; 700ms whole-board flare on claim."
+      },
+      {
+        "name": "sprinkle-fall",
+        "value": "460ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Bake Off mark; 600ms with 80ms row stagger on claim."
+      },
+      {
+        "name": "glint",
+        "value": "520ms cubic-bezier(0.2, 1.3, 0.4, 1)",
+        "purpose": "Ice mark, with a 600ms ease-out streak."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition 0.01ms, 1 iteration",
+        "purpose": "prefers-reduced-motion leaves instant states only."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-stack",
+        "value": "560px",
+        "purpose": "Doors and show hero stack; emblem centred."
+      },
+      {
+        "name": "sheet",
+        "value": "599px",
+        "purpose": "Claim banner becomes a bottom sheet below this."
+      },
+      {
+        "name": "show-columns",
+        "value": "800px",
+        "purpose": "Show page panels go 3fr/2fr."
+      },
+      {
+        "name": "room-two-column",
+        "value": "900px",
+        "purpose": "Tabs hide; card beside chat; manual hyphenation."
+      },
+      {
+        "name": "show-stage",
+        "value": "1100px",
+        "purpose": "Show emblem scales 1.55x."
+      },
+      {
+        "name": "room-three-column",
+        "value": "1200px",
+        "purpose": "World rail appears; card steps up."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one filled action: accent fill, display face, 48px tall; shape, size and tracking come from the world.",
+      "html": "<button class=\"ds-btn\">Start a room</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: var(--keyline, 1px) solid transparent; border-radius: var(--radius-control, 999px); background: var(--accent, #f1efe9); color: var(--accent-text, #121214); font-family: var(--font-display, system-ui, sans-serif); font-size: var(--btn-size, 1rem); font-weight: var(--btn-weight, 600); letter-spacing: var(--btn-tracking, 0.01em); cursor: pointer; transition: transform 0.08s ease-out, filter 0.15s ease-out; } .ds-btn:hover { filter: brightness(1.08); } .ds-btn:active { transform: translateY(1px); } .ds-btn:focus-visible { outline: 3px solid var(--focus, #f1efe9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quieter actions (host controls, share): transparent with a border edge.",
+      "html": "<button class=\"ds-btn-secondary\">Lock room</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: var(--keyline, 1px) solid var(--border, #34343b); border-radius: var(--radius-control, 999px); background: transparent; color: var(--text, #f1efe9); font-family: var(--font-display, system-ui, sans-serif); font-size: var(--btn-size, 1rem); font-weight: var(--btn-weight, 600); cursor: pointer; transition: transform 0.08s ease-out, filter 0.15s ease-out; } .ds-btn-secondary:hover { filter: brightness(1.08); } .ds-btn-secondary:active { transform: translateY(1px); } .ds-btn-secondary:focus-visible { outline: 3px solid var(--focus, #f1efe9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Disabled Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "An inert call (LINE not yet earned): dimmed fill, muted lettering and a dashed edge, so it never relies on hue alone.",
+      "html": "<button class=\"ds-btn-disabled\" disabled>Call LINE!</button>",
+      "css": ".ds-btn-disabled { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: var(--keyline, 1px) dashed color-mix(in srgb, var(--text, #f1efe9) 35%, transparent); border-radius: var(--radius-control, 999px); background: color-mix(in srgb, var(--accent, #f1efe9) 18%, var(--surface, #1b1b1f)); color: var(--muted, #aaa69e); font-family: var(--font-display, system-ui, sans-serif); font-size: var(--btn-size, 1rem); font-weight: var(--btn-weight, 600); cursor: not-allowed; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Name, chat and join-code fields: raised surface, 48px, 16px text to stop iOS zoom.",
+      "html": "<label class=\"ds-label\" for=\"ds-name\">Your name</label><input class=\"ds-input\" id=\"ds-name\" type=\"text\" placeholder=\"Who’s watching?\">",
+      "css": ".ds-label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--text, #f1efe9); } .ds-input { width: 100%; min-height: 48px; padding: 0 14px; border-radius: var(--radius-input, 10px); border: var(--keyline, 1px) solid var(--border, #34343b); background: var(--surface-2, #26262b); color: var(--text, #f1efe9); font: inherit; font-size: 16px; } .ds-input::placeholder { color: var(--muted, #aaa69e); opacity: 0.85; } .ds-input:focus-visible { outline: 3px solid var(--focus, #f1efe9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Room Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Phone-only sticky tab bar: three equal tabs in the display face; the active tab is accent-filled and aria-pressed.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Room sections\"><button class=\"ds-tab is-active\" aria-pressed=\"true\">Bingo</button><button class=\"ds-tab\" aria-pressed=\"false\">Chat</button><button class=\"ds-tab\" aria-pressed=\"false\">People (4)</button></nav>",
+      "css": ".ds-tabs { display: flex; gap: 4px; padding: 6px 0; background: var(--bg, #121214); } .ds-tab { flex: 1; min-height: 46px; border: var(--keyline, 1px) solid var(--border, #34343b); background: var(--surface, #1b1b1f); color: var(--text, #f1efe9); font: inherit; font-family: var(--font-display, system-ui, sans-serif); font-size: 1.05rem; border-radius: var(--radius-control, 999px); cursor: pointer; } .ds-tab.is-active { background: var(--accent, #f1efe9); color: var(--accent-text, #121214); border-color: transparent; } .ds-tab:focus-visible { outline: 3px solid var(--focus, #f1efe9); outline-offset: 2px; }; color: var(--text, #f1efe9); border: 1px solid currentColor; font-size: 0.75rem; line-height: 20px; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The shared container; each world adds its own edge (gilt keyline, rhinestones, lintel, piping, rink light).",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-h2\">Join with a code</h2><p class=\"ds-muted\">Got a code from a friend? Pop it in.</p></section>",
+      "css": ".ds-panel { background: var(--surface, #1b1b1f); border: var(--keyline, 1px) solid var(--border, #34343b); border-radius: var(--radius, 14px); box-shadow: var(--shadow, 0 2px 4px rgb(0 0 0 / 0.25), 0 12px 32px rgb(0 0 0 / 0.3)); padding: 20px; color: var(--text, #f1efe9); } .ds-h2 { font-family: var(--font-display, system-ui, sans-serif); font-weight: 400; font-size: clamp(1.35rem, 4vw, 1.85rem); line-height: 1.08; margin: 0 0 0.45em; } .ds-muted { color: var(--muted, #aaa69e); margin: 0; }"
+    },
+    {
+      "name": "Back Link",
+      "kind": "nav",
+      "description": "Navigational parent link above a title: underline plus a drawn chevron, never a label.",
+      "html": "<a class=\"ds-back\" href=\"#\">The Celebrity Traitors</a>",
+      "css": ".ds-back { display: inline-flex; align-items: center; gap: 0.45em; color: var(--text, #f1efe9); font-weight: 600; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--text, #f1efe9) 40%, transparent); text-underline-offset: 0.22em; } .ds-back::before { content: ''; width: 0.5em; height: 0.5em; border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); } .ds-back:hover { text-decoration-color: currentColor; } .ds-back:focus-visible { outline: 3px solid var(--focus, #f1efe9); outline-offset: 2px; }"
+    },
+    {
+      "name": "Tarot Tile (Traitors)",
+      "kind": "custom",
+      "refersTo": "tile-traitors",
+      "description": "Signature bingo tile in the Traitors world: bone face, ink border, inner keyline, numeral head; marked turns to an ultramarine face with a gilt keyline.",
+      "html": "<div class=\"ds-tarot\"><button class=\"ds-card\" aria-pressed=\"false\"><span class=\"ds-num\">IV</span><span class=\"ds-txt\">Traitor betrays a Traitor</span></button><button class=\"ds-card is-marked\" aria-pressed=\"true\"><span class=\"ds-num\">V</span><span class=\"ds-txt\">Mission in the dark</span></button></div>",
+      "css": ".ds-tarot { display: grid; grid-template-columns: repeat(2, 96px); gap: 8px; } .ds-card { display: flex; flex-direction: column; min-height: 134px; padding: 0; background: #e6dfcd; color: #0e0b1c; border: 2px solid #0e0b1c; border-radius: 4px; box-shadow: inset 0 0 0 3px #e6dfcd, inset 0 0 0 4.5px #0e0b1c, 0 2px 0 rgb(0 0 0 / 0.5), 0 8px 16px rgb(5 3 15 / 0.45); font: inherit; font-size: 0.8rem; cursor: pointer; text-align: center; } .ds-num { display: block; font-family: 'IM Fell English SC', Palatino, Georgia, serif; line-height: 1; letter-spacing: 0.06em; padding: 7px 4px 4px; margin: 0 5px; border-bottom: 1.5px solid currentColor; } .ds-txt { flex: 1; display: flex; align-items: center; justify-content: center; padding: 4px 8px 8px; font-weight: 600; line-height: 1.16; } .ds-card.is-marked { background: #2c4bb0; color: #e6dfcd; box-shadow: inset 0 0 0 3px #2c4bb0, inset 0 0 0 4.5px #f2c230, 0 2px 0 rgb(0 0 0 / 0.5), 0 8px 16px rgb(5 3 15 / 0.45); } .ds-card.is-marked .ds-num { color: #f2c230; } .ds-card:hover { filter: brightness(1.05); } .ds-card:active { transform: translateY(1px); } .ds-card:focus-visible { outline: 3px solid #f2c230; outline-offset: 2px; }"
+    },
+    {
+      "name": "Fondant Tile (Bake Off)",
+      "kind": "custom",
+      "refersTo": "tile-bakeoff",
+      "description": "Signature tile in the Bake Off world: pastel fondant with dotted royal-icing piping; marked goes solid-piped with the caption on an icing glaze.",
+      "html": "<div class=\"ds-tray\"><button class=\"ds-fondant\" aria-pressed=\"false\"><span>Soggy bottom</span></button><button class=\"ds-fondant is-marked\" aria-pressed=\"true\"><span>Handshake</span></button></div>",
+      "css": ".ds-tray { display: grid; grid-template-columns: repeat(2, 104px); gap: 8px; background: #22120c; padding: 12px; } .ds-fondant { min-height: 104px; padding: 7px; background: #f6b7c8; color: #3a2016; border: 0; border-radius: 14px; outline: 3px dotted #fff8f1; outline-offset: -6px; box-shadow: inset 0 -4px 0 rgb(58 32 22 / 0.18), 0 3px 0 rgb(0 0 0 / 0.35); font: inherit; font-size: 0.86rem; font-weight: 700; line-height: 1.15; cursor: pointer; } .ds-fondant span { padding: 3px 4px; border-radius: 8px; } .ds-fondant.is-marked { background: #a8e3cf; outline: 3px solid #fff8f1; outline-offset: -5px; } .ds-fondant.is-marked span { background: rgb(255 248 241 / 0.92); } .ds-fondant:active { transform: scale(0.97); } .ds-fondant:focus-visible { outline: 3px solid #f6e39a; outline-offset: 2px; }"
+    },
+    {
+      "name": "On Air Lamp",
+      "kind": "chip",
+      "refersTo": "on-air-lamp",
+      "description": "Lobby-only studio lamp on a door whose show is live; the door's copy and border also say so.",
+      "html": "<span class=\"ds-lamp\">On air</span>",
+      "css": ".ds-lamp { display: inline-block; padding: 6px 12px 5px; border-radius: 6px; border: 2px solid #3a0b07; background: #e3261b; color: #fff4ef; font-family: system-ui, sans-serif; font-size: 0.82rem; font-weight: 900; letter-spacing: 0.18em; text-transform: uppercase; box-shadow: 0 2px 4px rgb(0 0 0 / 0.5), 0 6px 22px rgb(227 38 27 / 0.55); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "One Living Room, Five Studios",
+    "overview": "WatchTogether is one product with a quiet lobby and five per-show worlds. The lobby is the dim living room where the telly is the main light: a charcoal ground, bone text and a plain sans. Each show is a studio set you step into, with its own type, palette, density and one signature move: The Traitors is a tarot spread, Strictly is sequinned costume fabric, I'm a Celeb is sign-painted camp planks, Bake Off is piped icing and sprinkles, and Dancing on Ice is a 1980s light-entertainment rink. Several shows can share one world (`src/shared/shows.ts` maps The Traitors and The Celebrity Traitors to `traitors`).\n\nThe structure never changes; only the skin does. Every page is built from standard tabs, buttons, inputs, panels and a 5×5 card made of real buttons. Components read tokens and nothing else. A world applies through `[data-world=…]`: on `<html>` for a show's pages, and on each home door so the lobby shows every world as a physical sample of itself. Worlds override the same token contract from `src/client/app.css` and add their material (keylines, sequin masks, icing, rope, glints) on top of the shared structure.\n\nThe system is built for glances in a dark room, one-handed, while the show is on. It is dark everywhere (`color-scheme: dark`), state is always carried by two signals, and motion happens once per action and then stops. The hard constraints are part of the design: a strict CSP (no inline styles, no external fonts), Trusted Types, and a 60 KB gzip first-load JS budget. Those constraints are why state lives in classes and data attributes, and why every face is a self-hosted woff2.",
+    "keyCharacteristics": [
+      "One token contract, six skins (the lobby plus five worlds), and fixed structure.",
+      "Dark grounds everywhere: charcoal, indigo, velvet, jungle night, ganache and studio blue.",
+      "One self-hosted display face per world, with the system sans for all reading text.",
+      "A 5×5 card of real buttons whose marked state is a material change (a turned card, sewn sequins, a brand, sprinkles, a flood with a glint), never a colour change alone.",
+      "One signature animation per mark and one full-card event per claim. Nothing else moves."
+    ],
+    "rules": [
+      {
+        "name": "The Contract Rule",
+        "body": "A world may only override the shared contract: `--font-body`, `--font-display`, `--display-case`, `--display-tracking`; `--bg`, `--surface`, `--surface-2`, `--text`, `--muted`, `--border`, `--accent`, `--accent-text`, `--danger`, `--ok`, `--focus`, `--selection`; `--radius`, `--radius-control`, `--radius-input`, `--keyline`, `--shadow`; `--btn-tracking`, `--btn-size`, `--btn-small-size`, `--btn-weight`; and `--c0` to `--c5`. Its material names (`--bone`, `--cedar`, `--icing`) stay private to its stylesheet. Components never read a world's private names.",
+        "section": "colors"
+      },
+      {
+        "name": "The Per-Person Slot Rule",
+        "body": "A person's colour reaches the page only through `data-c=\"0…5\"`, which sets `--person` from `--c0…--c5`. Every world redefines all six slots so they are readable on its own ground. Never write a person's colour as an inline style.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Signal Rule",
+        "body": "State is never colour alone. A marked tile changes material (a turned face, sequin texture with a stitched edge, a scorch with a burned star, sprinkles with solid piping, a flood with a glint). A near-line tile gains a dashed or dotted edge. A disabled button gets a dimmed fill, muted lettering and a dashed edge. An off-air home door is dashed and desaturated.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Face Per World Rule",
+        "body": "Each world ships exactly one OFL display face as a latin-subset woff2 under `src/client/assets/fonts/` (licences in `LICENSES.md`), declared with `font-display: swap`. Nothing loads from a font CDN; the CSP forbids it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Whole-Ladder Rule (Traitors only)",
+        "body": "In the Traitors world the display face also sets labels, tags, fact lists, the tally line and the countdown label at weight 400. The other worlds keep labels in the sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The Frame Clearance Rule",
+        "body": "A caption never crosses its tile's frame and never splits a word without a hyphen. Each world sets the tile's padding to clear its own frame (Traitors' inner keyline sits 4.5px in; the jungle pinstripe sits 4.5px in and its rope 6px in; Bake Off's piping is 3px wide and sits 6px in). Hyphenation is limited to words of 9 or more characters (`hyphenate-limit-chars: 9 4 3`) and is manual from 900px up. If the widest unbreakable word still doesn't fit, `lib/fit.ts` steps the caption down through `fit-1`, `fit-2` and `fit-3` (0.9em, 0.82em, 0.75em). The tile padding never shrinks to make room. `test/e2e/captions.spec.ts` enforces this.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thickness Rule",
+        "body": "The crisp 2–3px drop under a tile (`0 2px 0` or `0 3px 0` at 0.35–0.5 black) is the thickness of that world's object: a card, a plank, a fondant tile or an ice tile. It always comes with that world's material, and on panels it always pairs with a soft ambient drop. It is not a standalone offset-shadow device.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** read only contract tokens in components, and skin a new surface by overriding the contract under `[data-world=…]`.",
+      "**Do** carry state in classes and data attributes (`data-state`, `data-near`, `data-c`, `data-tab`, `fit-1…3`). The CSP forbids `style` attributes.",
+      "**Do** pair every colour change with a second signal: texture, a stitched, dotted or dashed edge, a burned mark, a glint, or text.",
+      "**Do** keep one signature move per mark and one full-card event per claim. Nothing in a card loops (Strictly's near-line glint stops after two pulses), and `prefers-reduced-motion` reduces everything to instant state changes.",
+      "**Do** set each world's tile padding to clear its own frame, and let `lib/fit.ts` step the caption size down rather than shrinking that padding.",
+      "**Do** self-host each world's single display face as an OFL latin woff2 with `font-display: swap`, and record it in `LICENSES.md`.",
+      "**Do** redefine all six `--c0…--c5` slots in a new world so every person's colour is readable on its ground.",
+      "**Do** keep every touch target at 48px, or 40px for `.btn.small`."
+    ],
+    "donts": [
+      "**Don't** let a caption cross a tile frame or split a word without a hyphen.",
+      "**Don't** load fonts, styles or scripts from a third-party origin, write inline styles, or add a dependency that threatens the 60 KB gzip first-load JS budget.",
+      "**Don't** add soft gradients, grain or glow to the Traitors world. Its stencil band uses hard colour stops and stays flat.",
+      "**Don't** fake wood grain or bevels on the I'm a Celeb planks. The plank is flat sign-painted cedar, and the only gradients are its scorch and the torchlight.",
+      "**Don't** set Dancing on Ice's silver lettering as gradient text. It is a solid colour with an offset bevel shadow.",
+      "**Don't** fall back on the categories' default looks: no generic dark grid with a show-coloured accent for the Traitors, no purple-and-gold star sparkle for Strictly, no green leaves or emoji bugs for the jungle, no cream paper or gingham for Bake Off, and no pale frosty-white snowflakes for Ice.",
+      "**Don't** let one world's material leak into another world or into the lobby's own chrome. A door shows a world only because it carries `data-world`."
+    ]
+  }
+}

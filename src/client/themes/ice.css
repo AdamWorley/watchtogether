@@ -1,0 +1,355 @@
+/*
+ * Dancing on Ice: 1980s Light-Entertainment TV.
+ * A deep studio-blue ground, dark ice tiles with frost edges, bevelled silver lettering and star-filter glints.
+ * Marking a square floods it ice-cyan and a four-point glint flashes across it.
+ * State is never colour alone: marked = cyan flood + glint star; near-line = dashed frost edge.
+ */
+@font-face {
+  font-family: 'Righteous';
+  src: url('../assets/fonts/righteous-latin.woff2') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+}
+
+[data-world='ice'] {
+  color-scheme: dark;
+  --font-display: 'Righteous', 'Avant Garde', 'Century Gothic', sans-serif;
+  --display-case: none;
+  --display-tracking: 0.02em;
+
+  --studio: #071330;
+  --rink: #10305c;
+  --frost: #8fd3ff;
+  --cyan: #5ee7ff;
+  --bolero: #7a3cf0;
+  --gold: #ffcc33;
+  --silver: #dfe8f5;
+
+  --bg: var(--studio);
+  --surface: #0d1f47;
+  --surface-2: #142a5a;
+  --text: #ecf6ff;
+  --muted: #a9bddc;
+  --border: #22406f;
+  --accent: var(--cyan);
+  --accent-text: #04203a;
+  --danger: #ff8fb0;
+  --ok: #7ff0c0;
+  --focus: var(--gold);
+  --selection: rgb(94 231 255 / 0.35);
+
+  --radius: 12px;
+  --radius-control: 999px;
+  --radius-input: 10px;
+  --keyline: 1px;
+  --shadow: 0 2px 6px rgb(0 0 0 / 0.4), 0 18px 40px rgb(0 4 20 / 0.55);
+  --btn-tracking: 0.04em;
+  --btn-size: 1.05rem;
+  --btn-weight: 400;
+
+  --c0: var(--cyan);
+  --c1: var(--gold);
+  --c2: #ff8fd1;
+  --c3: #b49bff;
+  --c4: #7ff0c0;
+  --c5: var(--silver);
+}
+
+/* Studio lights from above the rink. */
+html[data-world='ice'] body {
+  background:
+    radial-gradient(70% 50% at 20% -10%, rgb(122 60 240 / 0.28) 0%, transparent 70%),
+    radial-gradient(70% 50% at 80% -10%, rgb(94 231 255 / 0.18) 0%, transparent 70%), var(--studio);
+  background-attachment: fixed;
+}
+
+/* Bevelled silver display lettering (solid colour + offset shadow; never gradient text). */
+[data-world='ice'] h1,
+[data-world='ice'] h2 {
+  color: var(--silver);
+  text-shadow:
+    0 2px 0 #3d5d93,
+    0 4px 10px rgb(0 0 0 / 0.45);
+}
+
+/* ------------------------------------------------------------------ the rink */
+
+[data-world='ice'] .spread {
+  gap: clamp(4px, 1.1vw, 7px);
+  grid-auto-rows: 1fr;
+}
+
+[data-world='ice'] .spread .cell {
+  position: relative;
+  min-height: clamp(70px, 19vw, 112px);
+  padding: 6px 5px;
+  background: var(--rink);
+  color: var(--text);
+  border: 1px solid #2b5a94;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgb(143 211 255 / 0.45),
+    inset 0 -2px 0 rgb(0 0 0 / 0.25),
+    0 2px 0 rgb(0 0 0 / 0.4);
+  font-size: clamp(0.6rem, 2.35vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.15;
+  overflow: hidden;
+}
+
+[data-world='ice'] .spread .num {
+  display: none;
+}
+
+/* the star-filter glint: centred behind the caption so it never sits on the words */
+[data-world='ice'] .spread .txt {
+  position: relative;
+  z-index: 1;
+}
+
+[data-world='ice'] .spread .cell::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: 70%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  background: #fff;
+  -webkit-mask: url('../assets/glint.svg') center / contain no-repeat;
+  mask: url('../assets/glint.svg') center / contain no-repeat;
+  opacity: 0;
+  scale: 0.3;
+  rotate: -45deg;
+}
+
+[data-world='ice'] .spread .cell[data-state='marked'],
+[data-world='ice'] .spread .cell[data-state='free'],
+[data-world='ice'] .spread .cell[data-state='win'] {
+  background: var(--cyan);
+  color: #04203a;
+  border-color: #c8f6ff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.7),
+    0 2px 0 rgb(0 0 0 / 0.4);
+}
+
+[data-world='ice'] .spread .cell[data-state='marked']::after,
+[data-world='ice'] .spread .cell[data-state='free']::after,
+[data-world='ice'] .spread .cell[data-state='win']::after {
+  opacity: 0.45;
+  scale: 1;
+  rotate: 0deg;
+}
+
+[data-world='ice'] .spread .cell[data-state='free'] {
+  background: var(--bolero);
+  color: #fff;
+}
+
+[data-world='ice'] .spread .cell[data-state='free'] .txt {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(0.7rem, 2.6vw, 0.98rem);
+}
+
+[data-world='ice'] .spread .free-sub {
+  font-family: var(--font-body);
+  font-size: 0.68em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+}
+
+/* Winning line: a gold edge, like a perfect score lighting up. */
+[data-world='ice'] .spread .cell[data-state='win'] {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 2px 0 rgb(0 0 0 / 0.4);
+}
+
+/* The tile that would finish a line: a dashed frost edge. */
+[data-world='ice'] .spread .cell[data-near] {
+  outline: 2px dashed var(--frost);
+  outline-offset: -5px;
+}
+
+/* Signature move: the glint. A star flares and a light streak crosses the ice. */
+[data-world='ice'] .spread .cell.just-changed::after {
+  animation: glint 520ms cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+[data-world='ice'] .spread .cell.just-changed::before,
+[data-world='ice'] .spread.event .cell:not([data-state='plain'])::before {
+  content: '';
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(110deg, transparent 40%, rgb(255 255 255 / 0.85) 50%, transparent 60%);
+  animation: streak 600ms ease-out both;
+  pointer-events: none;
+}
+
+@keyframes glint {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+    rotate: -90deg;
+  }
+  60% {
+    opacity: 0.9;
+    scale: 1.25;
+    rotate: 10deg;
+  }
+}
+
+@keyframes streak {
+  from {
+    transform: translateX(-60%);
+  }
+  to {
+    transform: translateX(60%);
+    opacity: 0;
+  }
+}
+
+[data-world='ice'] .spread button.cell:active {
+  transform: scale(0.97);
+}
+
+[data-world='ice'] .spread.compact {
+  gap: 3px;
+}
+
+[data-world='ice'] .spread.compact .cell {
+  min-height: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ emblem: the rink and the score */
+
+[data-world='ice'] .emblem {
+  position: relative;
+  width: 176px;
+  height: 128px;
+  flex: none;
+}
+
+[data-world='ice'] .emblem .rink {
+  position: absolute;
+  inset: 0;
+  border-radius: 64px;
+  background: var(--rink);
+  border: 3px solid var(--frost);
+  box-shadow:
+    inset 0 0 0 6px var(--rink),
+    inset 0 0 0 7px rgb(143 211 255 / 0.35),
+    0 12px 28px rgb(0 0 0 / 0.5);
+  overflow: hidden;
+}
+
+/* blade tracings: two figure-of-eight loops cut in the ice */
+[data-world='ice'] .emblem .tracing {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  top: 34px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid rgb(143 211 255 / 0.5);
+  box-shadow: 70px 0 0 -2px transparent;
+}
+
+[data-world='ice'] .emblem .score {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  color: var(--silver);
+  text-shadow:
+    0 2px 0 #3d5d93,
+    0 4px 12px rgb(0 0 0 / 0.5);
+}
+
+[data-world='ice'] .emblem .glint {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  -webkit-mask: url('../assets/glint.svg') center / contain no-repeat;
+  mask: url('../assets/glint.svg') center / contain no-repeat;
+  transition: transform 0.5s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+[data-world='ice'] .emblem .glint-a {
+  top: 18px;
+  right: 34px;
+}
+
+[data-world='ice'] .emblem .glint-b {
+  bottom: 18px;
+  left: 30px;
+  width: 14px;
+  height: 14px;
+}
+
+[data-world='ice'].door:hover .emblem .glint,
+[data-world='ice'].door:focus-visible .emblem .glint {
+  transform: rotate(90deg) scale(1.4);
+}
+
+/* ------------------------------------------------------------------ large-screen sidebar: the scoreboard */
+
+[data-world='ice'] .rail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+[data-world='ice'] .rail-head {
+  height: 14px;
+  background: linear-gradient(90deg, var(--bolero), var(--cyan));
+}
+
+[data-world='ice'] .tally {
+  background: var(--studio);
+  border: 2px solid var(--gold);
+  border-radius: 14px;
+}
+
+[data-world='ice'] .tally-num span {
+  color: var(--gold);
+}
+
+[data-world='ice'] .rail .btn {
+  width: 100%;
+}
+
+@media (min-width: 1200px) {
+  [data-world='ice'] .spread:not(.compact) {
+    max-width: 680px;
+  }
+}
+
+/* Every panel is a rink board, lit along its top edge. */
+[data-world='ice'] .card {
+  border-color: #2b5a94;
+  box-shadow:
+    inset 0 3px 0 var(--cyan),
+    inset 0 4px 0 rgb(0 0 0 / 0.3),
+    var(--shadow);
+}
+
+/* The Bolero centre: keep the glint faint so the gold FREE label holds its contrast. */
+[data-world='ice'] .spread .cell[data-state='free']::after {
+  opacity: 0.16;
+}

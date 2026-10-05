@@ -1,4 +1,4 @@
-// Top level = production (watchtogether.uk). `previews` = per-PR Worker Previews (`wrangler preview`).
+// Top level = production (watchtogether.uk). `previews` = per-branch Worker Previews (Workers Builds runs `wrangler preview`).
 // Previews don't inherit production bindings, so they are repeated there, pointed at preview-only resources.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
@@ -11,7 +11,7 @@
     "run_worker_first": ["/api/*"],
   },
   "routes": [{ "pattern": "watchtogether.uk", "custom_domain": true }],
-  // Production is never served on workers.dev; Previews are (pr-<n>-watchtogether.<account>.workers.dev).
+  // Production is never served on workers.dev; Previews are (<branch>-watchtogether.<account>.workers.dev).
   "workers_dev": false,
   "preview_urls": true,
   "observability": { "enabled": true, "head_sampling_rate": 1 },

@@ -79,9 +79,13 @@ only append or edit in place. Reorder between episodes.
 
 ## Deployment
 
-GitHub Actions does everything:
+**Cloudflare Workers Builds** deploys (the Cloudflare GitHub app). **GitHub Actions** gates.
 
-- **`ci.yml`** runs on every PR:
+- **Workers Builds:**
+  - Every push to `main` runs `npm run build`, then `npx wrangler deploy` to production.
+  - Every push to another branch runs `npm run build`, then `npx wrangler preview`. That creates or updates
+    a Worker Preview named after the branch, and the URL is posted on the PR.
+- **`ci.yml`** runs on every PR and on `main`:
   - npm audit
   - type-generation drift check
   - lint
@@ -91,30 +95,35 @@ GitHub Actions does everything:
   - JS size budget (60 KB gzip)
   - `wrangler deploy --dry-run`
   - Playwright
-  - once all of that passes, a **Worker Preview** (`wrangler preview --name pr-<n>`), smoke-tested, with its
-    URL on the PR's "View deployment" button and in the job summary. Pushing to the branch updates it.
-- **`preview-cleanup.yml`** deletes the PR's Preview when the PR is merged or closed.
-- **`deploy.yml`** runs on every push to `main`. It reruns CI, deploys to production and runs a smoke test.
 - **`codeql.yml`** runs on PRs, on pushes to `main`, and weekly.
+
+Production only changes when a PR that passed these checks is merged, which branch protection enforces.
+`scripts/smoke.sh <url>` checks a deployment by hand (headers, schedule API, cross-origin rejection).
 
 There is no staging environment: the PR Preview is where you check a change before merging. Each Preview gets
 its own Durable Object storage, so rooms opened there never mix with production. All Previews share one
 preview-only KV namespace (TVmaze cache and room codes). Previews don't run the cron; they fetch the schedule
 from TVmaze on first request. Every show on a Preview also has an always-live "Preview test episode"
 (`DEMO_EPISODES=on` in the `previews` block), so rooms can be tested at any time. Production has it `off`.
-PRs from forks and Dependabot get no Preview, because they don't receive secrets.
+Workers Builds doesn't delete Previews when a PR closes. Cloudflare evicts the least recently used once a
+Worker has 100 (Free) or 500 (Paid). To remove one sooner, run `npx wrangler preview delete --name <branch>`.
 
 ### One-time setup
 
-1. **Cloudflare API token** (My Profile → API Tokens), scoped to this account only, with these permissions:
-   Account › Workers Scripts: Edit, Account › Workers KV Storage: Edit, Zone › Workers Routes: Edit
-   (zone `watchtogether.uk`) and Zone › DNS: Edit (for the custom domains).
-2. **GitHub → Settings → Environments.** Create `preview` and `production`, each with the secrets
-   `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Restrict `production` to the `main` branch. Required
-   reviewers on `production` are optional now that merging is the release step.
-3. **GitHub → Settings → Branches.** Protect `main`: require a PR, and require the status checks
+1. **Cloudflare dashboard → Workers & Pages → Create → Import a repository.** Pick this repo, with these
+   settings:
+   - Worker name `watchtogether`, which must match `wrangler.jsonc`.
+   - Production branch `main`.
+   - Build command `npm run build`.
+   - Deploy command `npx wrangler deploy`.
+   - Under **Settings → Build → Branch control**, enable Preview Builds with the Preview command
+     `npx wrangler preview`.
+
+   Node comes from `.nvmrc`. No Cloudflare secrets live in GitHub.
+
+2. **GitHub → Settings → Branches.** Protect `main`: require a PR, and require the status checks
    _Lint, type-check, test, build_, _End-to-end (Playwright)_ and _CodeQL / analyze_.
-4. The first deploy creates the KV namespaces, the Durable Object class and the custom domains
+3. The first production build creates the KV namespaces, the Durable Object class and the custom domain
    (`watchtogether.uk`). After that, in the Cloudflare dashboard:
    - Add a redirect rule from `www.watchtogether.uk` to the apex.
    - Turn on Always Use HTTPS.

@@ -58,7 +58,7 @@
 <section class="container hero">
   <h1>The telly’s on. <span class="line2">Bring everyone.</span></h1>
   <div class="bars" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
   <p class="lead">
     Start a room when your show airs and share the invite link. Everyone gets their own bingo card and a live
@@ -172,9 +172,10 @@
   }
 
   /* A telly test-card strip drawn from both worlds' colours. */
+  /* The brand's test-card bars (src/client/lib/brand.ts BARS), the same seven as the logo's screen. */
   .bars {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     width: min(100%, 560px);
     height: 14px;
     margin-bottom: 28px;
@@ -201,9 +202,6 @@
   }
   .bars span:nth-child(7) {
     background: #2c4bb0;
-  }
-  .bars span:nth-child(8) {
-    background: #a678ff;
   }
 
   .lead {

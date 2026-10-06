@@ -2,6 +2,7 @@
   import { cardKey, FREE, FREE_CELL, generateCard } from '../../shared/bingo';
   import { SHOWS, type ShowSlug } from '../../shared/shows';
   import { roman } from '../lib/roman';
+  import Logo from '../components/Logo.svelte';
   import { loadSquares } from '../lib/squares';
   import { VOICES } from '../lib/voice';
 
@@ -94,6 +95,7 @@
         <footer class="sheet-foot">
           <span>Name: ______________________</span>
           <span>Mark a square when it happens. First LINE wins, then FULL HOUSE.</span>
+          <span class="sheet-brand"><Logo /> watchtogether.uk</span>
         </footer>
       </article>
     {/each}
@@ -213,6 +215,14 @@
     font-size: 0.6rem;
     font-weight: 800;
     letter-spacing: 0.14em;
+  }
+  .sheet-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-weight: 700;
+    --logo-height: 18px;
   }
   .sheet-foot {
     display: flex;

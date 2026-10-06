@@ -2,6 +2,8 @@
 // The image takes the current world's tokens and display face, so it looks like the room it came from.
 import { FREE, FREE_CELL } from '../../shared/bingo';
 import { SHOWS, type ShowSlug } from '../../shared/shows';
+import { BARS, LOCKUP, MARK, SCREEN_SURROUND, WORD } from './brand';
+import { WORD_PATH } from './brand-word';
 import type { RoomConnection } from './room.svelte';
 import { roman } from './roman';
 import { loadSquares } from './squares';
@@ -59,6 +61,43 @@ function fitFont(
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, r);
+}
+
+/** Draw the WatchTogether lockup centred on (cx, top), `height` px tall, set and wordmark in `colour`. */
+function drawLogo(ctx: CanvasRenderingContext2D, cx: number, top: number, height: number, colour: string) {
+  const s = height / LOCKUP.height;
+  ctx.save();
+  ctx.translate(cx - (LOCKUP.width * s) / 2, top);
+  ctx.scale(s, s);
+  ctx.save();
+  ctx.translate(0, LOCKUP.markY);
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = MARK.antenna.width;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke(new Path2D(MARK.antenna.d));
+  const box = (b: { x: number; y: number; w: number; h: number; r: number }, fill: string) => {
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.roundRect(b.x, b.y, b.w, b.h, b.r);
+    ctx.fill();
+  };
+  box(MARK.body, colour);
+  box(MARK.surround, SCREEN_SURROUND);
+  ctx.beginPath();
+  ctx.roundRect(MARK.screen.x, MARK.screen.y, MARK.screen.w, MARK.screen.h, MARK.screen.r);
+  ctx.clip();
+  const bar = MARK.screen.w / BARS.length;
+  BARS.forEach((c, i) => {
+    ctx.fillStyle = c;
+    ctx.fillRect(MARK.screen.x + i * bar, MARK.screen.y, bar + 0.05, MARK.screen.h);
+  });
+  ctx.restore();
+  ctx.translate(WORD.x, WORD.baseline);
+  ctx.scale(WORD.scale, WORD.scale);
+  ctx.fillStyle = colour;
+  ctx.fill(new Path2D(WORD_PATH));
+  ctx.restore();
 }
 
 export async function drawKeepsake(input: KeepsakeInput): Promise<Blob> {
@@ -127,19 +166,21 @@ export async function drawKeepsake(input: KeepsakeInput): Promise<Blob> {
   const cardBottom = top + 5 * size + 4 * gap;
   ctx.fillStyle = accent;
   ctx.font = `72px ${display}`;
-  ctx.fillText(tally, W / 2, cardBottom + 96);
+  ctx.fillText(tally, W / 2, cardBottom + 84);
   ctx.fillStyle = text;
   ctx.font = `600 32px ${body}`;
   const calls = input.claims.length
     ? input.claims.map((c) => (c === 'line' ? 'LINE' : 'FULL HOUSE')).join(' · ')
     : 'No calls this time';
-  ctx.fillText(`${voice.tally.unit} · ${calls}`, W / 2, cardBottom + 146);
+  ctx.fillText(`${voice.tally.unit} · ${calls}`, W / 2, cardBottom + 128);
+  // Provenance: the brand lockup, then the date.
+  drawLogo(ctx, W / 2, cardBottom + 160, 44, text);
   ctx.fillStyle = muted;
-  ctx.font = `500 26px ${body}`;
+  ctx.font = `500 24px ${body}`;
   const date = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(
     Date.now(),
   );
-  ctx.fillText(`watchtogether.uk · ${date}`, W / 2, H - 70);
+  ctx.fillText(`watchtogether.uk · ${date}`, W / 2, H - 56);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob(

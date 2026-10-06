@@ -1,6 +1,7 @@
 <script lang="ts">
   import { isShowSlug, SHOWS, type ShowSlug } from '../shared/shows';
   import Footer from './components/Footer.svelte';
+  import Logo from './components/Logo.svelte';
   import { router } from './lib/router.svelte';
   import Home from './routes/Home.svelte';
   import NotFound from './routes/NotFound.svelte';
@@ -55,19 +56,12 @@
 
 <svelte:document {onclick} />
 
-{#if route.name !== 'home'}
-  <!-- Always one tap back to the lobby, styled by whichever world the page is in. -->
-  <nav class="container site-bar" aria-label="Site">
-    <a class="home-link" href="/">
-      <svg class="telly" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 3l4 3 4-3" />
-        <rect x="2.5" y="6.5" width="19" height="13" rx="2.5" />
-        <rect x="5.5" y="9.5" width="13" height="7" rx="1" />
-      </svg>
-      <span>WatchTogether</span>
-    </a>
-  </nav>
-{/if}
+<!-- The brand, and always one tap back to the lobby, styled by whichever world the page is in. -->
+<nav class="container site-bar" aria-label="Site">
+  <a class="home-link" href="/" aria-current={route.name === 'home' ? 'page' : undefined}>
+    <Logo label="WatchTogether" />
+  </a>
+</nav>
 
 <main>
   {#if route.name === 'home'}
@@ -116,27 +110,13 @@
   .home-link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
     min-height: 44px;
     color: var(--text);
-    font-family: var(--font-body);
-    font-weight: 800;
-    font-size: 1rem;
-    letter-spacing: -0.02em;
-    text-decoration: none;
+    --logo-height: 30px;
+    transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .home-link:hover span {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
-  }
-  .telly {
-    width: 24px;
-    height: 24px;
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  .home-link:hover {
+    color: var(--accent);
   }
   main {
     flex: 1;

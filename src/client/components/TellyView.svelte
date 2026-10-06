@@ -7,6 +7,7 @@
   import type { RoomConnection } from '../lib/room.svelte';
   import { roman } from '../lib/roman';
   import { COMMON, VOICES } from '../lib/voice';
+  import Logo from './Logo.svelte';
   import WorldEmblem from './WorldEmblem.svelte';
 
   interface Props {
@@ -69,7 +70,10 @@
           Room closes at {formatTime(room.closesAt)} · in {formatDuration(room.closesAt - clock.now)}
         </p>
       </div>
-      <button class="btn secondary exit" type="button" onclick={onexit}>Leave telly mode</button>
+      <div class="telly-brand">
+        <Logo label="WatchTogether" />
+        <button class="btn secondary exit" type="button" onclick={onexit}>Leave telly mode</button>
+      </div>
     </header>
 
     <div class="telly-body">
@@ -178,8 +182,14 @@
     font-size: clamp(1rem, 1.5vw, 1.5rem);
     font-variant-numeric: tabular-nums;
   }
-  .exit {
+  .telly-brand {
     align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1.6vh;
+    color: var(--text);
+    --logo-height: clamp(28px, 3.2vw, 52px);
   }
   .telly-body {
     flex: 1;

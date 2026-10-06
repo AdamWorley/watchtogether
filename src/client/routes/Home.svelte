@@ -1,10 +1,11 @@
 <script lang="ts">
   import { shortName, SHOW_SLUGS, SHOWS, type ShowSlug } from '../../shared/shows';
   import { episodeWindow, liveEpisode, nextEpisode, type Episode } from '../../shared/window';
+  import ChannelBadge from '../components/ChannelBadge.svelte';
   import WorldEmblem from '../components/WorldEmblem.svelte';
   import { getSchedule } from '../lib/api';
   import { useClock } from '../lib/clock.svelte';
-  import { formatDay, formatDuration, formatTime } from '../lib/format';
+  import { formatDuration, formatTime, formatWhen } from '../lib/format';
   import { VOICES } from '../lib/voice';
 
   const clock = useClock();
@@ -57,7 +58,7 @@
 <section class="container hero">
   <h1>The telly’s on. <span class="line2">Bring everyone.</span></h1>
   <div class="bars" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
   <p class="lead">
     Start a room when your show airs and share the invite link. Everyone gets their own bingo card and a live
@@ -85,6 +86,7 @@
       <WorldEmblem show={slug} />
       <div class="copy">
         <h3>{shortName(slug)}</h3>
+        <ChannelBadge show={slug} />
         <p class="tagline">{voice.tagline}</p>
         {#if d.kind === 'live'}
           <p class="when">
@@ -109,13 +111,18 @@
       <WorldEmblem show={slug} />
       <div class="copy">
         <h3>{shortName(slug)}</h3>
+        <ChannelBadge show={slug} />
         {#if d.kind === 'loading'}
           <p class="when">Checking the schedule…</p>
         {:else if d.kind === 'next'}
           {@const w = episodeWindow(d.episode)}
+          {@const when = formatWhen(Date.parse(d.episode.airstamp), clock.now)}
           <p class="when">
-            {d.newSeries ? `Series ${d.episode.season} starts` : 'Next on'}
-            {formatDay(Date.parse(d.episode.airstamp))}
+            {d.newSeries
+              ? `Series ${d.episode.season} starts ${when}`
+              : when.startsWith('today')
+                ? `On ${when}`
+                : `Next on ${when}`}
           </p>
           <p class="opens">
             Rooms open at {formatTime(w.opensAt)} · in {formatDuration(w.opensAt - clock.now)}
@@ -165,9 +172,10 @@
   }
 
   /* A telly test-card strip drawn from both worlds' colours. */
+  /* The brand's test-card bars (src/client/lib/brand.ts BARS), the same seven as the logo's screen. */
   .bars {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     width: min(100%, 560px);
     height: 14px;
     margin-bottom: 28px;
@@ -194,9 +202,6 @@
   }
   .bars span:nth-child(7) {
     background: #2c4bb0;
-  }
-  .bars span:nth-child(8) {
-    background: #a678ff;
   }
 
   .lead {

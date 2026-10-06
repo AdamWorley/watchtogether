@@ -76,8 +76,10 @@ isn't affiliated with the BBC or the shows' producers. What makes it what it is:
 ## Brand Commitments
 
 - **Name:** WatchTogether. **Domain:** watchtogether.uk.
-- **Labelling:** always label it an unofficial fan site. Don't use BBC or show logos, trademarks, official
-  artwork or presenters' likenesses.
+- **Labelling:** always label it an unofficial fan site, not affiliated with or endorsed by the BBC, ITV,
+  Channel 4 or the producers. Channel logos (BBC One, ITV1, Channel 4) may appear, small and monochrome, only to
+  show where a programme airs (owner's decision, October 2026). Don't use show logos, official artwork or
+  presenters' likenesses.
 - **Voice: full camp, per show.** Each show's area leans hard into that show's persona:
   - **The Celebrity Traitors:** sinister, theatrical and conspiratorial. Round tables, murders, banishments,
     cloaks and suspicion.

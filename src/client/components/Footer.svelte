@@ -2,8 +2,9 @@
 
 <footer class="container">
   <p>
-    <a href="/">WatchTogether</a> is an unofficial fan site, not affiliated with the BBC or the shows’
-    producers. Rooms are temporary and deleted when they close. <a href="/privacy">Privacy</a>.
+    <a href="/">WatchTogether</a> is an unofficial fan site, not affiliated with or endorsed by the BBC, ITV,
+    Channel 4 or the shows’ producers. Channel logos are trademarks of their owners and only show where each
+    programme airs. Rooms are temporary and deleted when they close. <a href="/privacy">Privacy</a>.
   </p>
   <p>
     Air times from <a href="https://www.tvmaze.com/" rel="noopener noreferrer" target="_blank">TVmaze</a>

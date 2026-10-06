@@ -10,3 +10,9 @@ from Google Fonts (latin subset, woff2) on 2026-10-05.
 | `rye-latin.woff2`                | Rye                | Nicole Fally, Sorkin Type         | I’m a Celebrity world        |
 | `leckerli-one-latin.woff2`       | Leckerli One       | Gesine Todt                       | Bake Off world               |
 | `righteous-latin.woff2`          | Righteous          | Astigmatic                        | Dancing on Ice world         |
+
+## Wordmark
+
+The WatchTogether wordmark is set in **Bricolage Grotesque** (Mathieu Triay; SIL OFL 1.1), ExtraBold, width
+85, and outlined to paths (`src/client/lib/brand-word.ts`, `src/client/assets/brand/wordmark.svg`). No font
+file ships; outlined artwork made with an OFL font isn't Font Software, so it can be used freely as a logo.

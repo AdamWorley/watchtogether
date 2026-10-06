@@ -1,3 +1,5 @@
+import { sameLondonDay } from '../../shared/window';
+
 const timeFmt = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
@@ -14,6 +16,11 @@ const dayFmt = new Intl.DateTimeFormat('en-GB', {
 
 export const formatTime = (ms: number) => timeFmt.format(ms);
 export const formatDay = (ms: number) => dayFmt.format(ms);
+
+/** "today at 20:00" when it airs today (UK time), otherwise "Tuesday 6 October at 20:00". */
+export function formatWhen(ms: number, now: number): string {
+  return sameLondonDay(ms, now) ? `today at ${formatTime(ms)}` : formatDay(ms);
+}
 
 export function formatDuration(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));

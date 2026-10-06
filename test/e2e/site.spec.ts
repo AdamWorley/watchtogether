@@ -89,6 +89,8 @@ test('every page has one-tap navigation back to the lobby', async ({ page }) => 
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('The telly’s on');
   }
-  // The lobby itself doesn't need the bar.
-  await expect(page.getByRole('navigation', { name: 'Site' })).toHaveCount(0);
+  // The lobby carries the brand too, marked as the current page.
+  await expect(
+    page.getByRole('navigation', { name: 'Site' }).getByRole('link', { name: 'WatchTogether' }),
+  ).toHaveAttribute('aria-current', 'page');
 });

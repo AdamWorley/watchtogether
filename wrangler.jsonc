@@ -45,6 +45,7 @@
     // Same bindings, but higher rate limits because every test browser shares one IP.
     "e2e": {
       "name": "watchtogether-e2e",
+      "routes": [],
       "vars": { "DEMO_EPISODES": "off" },
       "workers_dev": false,
       "preview_urls": false,

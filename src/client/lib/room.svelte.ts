@@ -7,8 +7,10 @@ import {
   type Claim,
   type ClientMessage,
   type Member,
+  type Predictions,
   type RoomState,
 } from '../../shared/protocol';
+import type { QuestionId } from '../../shared/predictions';
 import { personSlot } from './person';
 import type { Session } from './session';
 
@@ -21,7 +23,9 @@ export type FeedItem =
   | { kind: 'chat'; key: string; entry: ChatEntry }
   /** Rendered in the show's voice by the UI (lib/voice.ts). `filterOn` is the state after a filter change. */
   | { kind: 'system'; key: string; event: SystemEvent; name?: string; filterOn?: boolean; at: number }
-  | { kind: 'claim'; key: string; claim: Claim };
+  | { kind: 'claim'; key: string; claim: Claim }
+  /** The host recorded what happened; `right` names everyone who picked it. */
+  | { kind: 'verdict'; key: string; q: QuestionId; name: string; right: string[]; at: number };
 
 export type Status = 'connecting' | 'open' | 'reconnecting' | 'ended' | 'kicked' | 'unauthorised';
 
@@ -37,6 +41,7 @@ export class RoomConnection {
   marks = $state<number[]>([]);
   members = $state<Member[]>([]);
   claims = $state<Claim[]>([]);
+  predictions = $state<Predictions>({ lineup: [], picks: [], verdicts: [] });
   feed = $state<FeedItem[]>([]);
   notice = $state<Notice | null>(null);
   latestClaim = $state<Claim | null>(null);
@@ -105,6 +110,7 @@ export class RoomConnection {
         this.#confirmedMarks = msg.marks;
         this.members = msg.members;
         this.claims = msg.claims;
+        this.predictions = msg.predictions;
         // Rebuild the feed from the server's view so reconnects don't duplicate.
         this.feed = [
           ...msg.chat.map((entry): FeedItem => ({ kind: 'chat', key: `c${entry.id}`, entry })),
@@ -124,8 +130,22 @@ export class RoomConnection {
       case 'chat':
         this.#push({ kind: 'chat', key: `c${msg.entry.id}`, entry: msg.entry });
         break;
+      case 'predictions':
+        this.predictions = msg.predictions;
+        break;
       case 'system': {
         if (msg.kind === 'leave') break; // presence dots already show who's here
+        if (msg.kind === 'verdict') {
+          if (msg.q === undefined || msg.name === undefined) break;
+          const { q, name } = msg;
+          // Sent after the final predictions, so these picks are the ones that count.
+          const right = this.predictions.picks
+            .filter((p) => p.q === q && p.name === name)
+            .map((p) => this.members.find((m) => m.id === p.memberId)?.name)
+            .filter((n) => n !== undefined);
+          this.#push({ kind: 'verdict', key: `v${msg.at}${q}`, q, name, right, at: msg.at });
+          break;
+        }
         const item: FeedItem = { kind: 'system', key: `s${msg.at}${msg.kind}`, event: msg.kind, at: msg.at };
         if (msg.name !== undefined) item.name = msg.name;
         // The 'room' update is sent before its 'system' message, so this is already the new state.

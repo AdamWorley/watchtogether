@@ -1,24 +1,29 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { shortName, SHOW_SLUGS, SHOWS, type ShowSlug } from '../../shared/shows';
   import { episodeWindow, liveEpisode, nextEpisode, type Episode } from '../../shared/window';
   import ChannelBadge from '../components/ChannelBadge.svelte';
+  import HeroTelly from '../components/HeroTelly.svelte';
   import WorldEmblem from '../components/WorldEmblem.svelte';
   import { getSchedule } from '../lib/api';
   import { useClock } from '../lib/clock.svelte';
   import { formatDuration, formatTime, formatWhen } from '../lib/format';
-  import { VOICES } from '../lib/voice';
+  import { listNames, VOICES } from '../lib/voice';
 
   const clock = useClock();
   // undefined = still loading, null = couldn't load (the door then stays a plain link).
   let schedules = $state<Partial<Record<ShowSlug, Episode[] | null>>>({});
 
-  $effect(() => {
-    for (const slug of SHOW_SLUGS) {
+  function load(slugs: readonly ShowSlug[]) {
+    for (const slug of slugs) {
+      delete schedules[slug];
       getSchedule(slug)
         .then((s) => (schedules[slug] = s.episodes))
         .catch(() => (schedules[slug] = null));
     }
-  });
+  }
+
+  $effect(() => untrack(() => load(SHOW_SLUGS)));
 
   type DoorState =
     | { kind: 'loading' }
@@ -38,7 +43,7 @@
     return { kind: 'dark' };
   }
 
-  const liveCount = $derived(SHOW_SLUGS.filter((s) => doorState(s).kind === 'live').length);
+  const loading = $derived(SHOW_SLUGS.some((s) => doorState(s).kind === 'loading'));
 
   // Live shows first, then whatever airs soonest, then shows off the air.
   function rank(slug: ShowSlug): number {
@@ -49,42 +54,100 @@
     return 4;
   }
   const ordered = $derived([...SHOW_SLUGS].sort((a, b) => rank(a) - rank(b)));
-  // Doors that open (live, or schedule unknown) lead; everything else is "coming up".
-  const opens = (slug: ShowSlug) => ['live', 'unknown'].includes(doorState(slug).kind);
-  const liveSlugs = $derived(ordered.filter(opens));
-  const restSlugs = $derived(ordered.filter((slug) => !opens(slug)));
+  const kindOf = (slug: ShowSlug) => doorState(slug).kind;
+  const liveSlugs = $derived(ordered.filter((s) => kindOf(s) === 'live'));
+  // Couldn't load the times: still a door you can open, but never presented as on air.
+  const unknownSlugs = $derived(ordered.filter((s) => kindOf(s) === 'unknown'));
+  const restSlugs = $derived(ordered.filter((s) => !['live', 'unknown'].includes(kindOf(s))));
+  const isLive = $derived(liveSlugs.length > 0);
+  // The soonest show that isn't on yet, for "Next up".
+  const upNext = $derived.by(() => {
+    const slug = ordered.find((s) => kindOf(s) === 'next');
+    const d = slug ? doorState(slug) : undefined;
+    return slug && d?.kind === 'next'
+      ? { slug, when: formatWhen(Date.parse(d.episode.airstamp), clock.now) }
+      : undefined;
+  });
+  // Tonight means something is on, or will be later today.
+  const tonight = $derived(isLive || (upNext?.when.startsWith('today') ?? false));
+  // The telly quotes what's on, then what's next, rather than shows nobody can watch.
+  const tellyShows = $derived(ordered.filter((s) => ['live', 'next'].includes(kindOf(s))));
+
+  // Tonight, as a TV listings page: what happens when, from doors open to lights out.
+  const RUNNING_ORDER = [
+    {
+      when: 'Half an hour before',
+      title: 'Doors open',
+      body: 'One of you starts a room and drops the link in the group chat. Everyone else is in with just a name. No sign-ups, no apps, no faff.',
+    },
+    {
+      when: 'On air',
+      title: 'Eyes down',
+      body: 'Everyone gets their own bingo card of the show’s clichés. Mark them as they land, call LINE before anyone else, then be insufferable about it in the chat.',
+    },
+    {
+      when: 'Before the verdict',
+      title: 'Place your bets',
+      body: 'Who’s getting banished? Murdered? Sent home? Who’s Star Baker? Everyone picks, the tally’s there for all to see, and the host reveals who called it.',
+    },
+    {
+      when: 'An hour after',
+      title: 'Lights out',
+      body: 'The room closes, and the chat, the cards and every terrible take are deleted for good. Same time next week?',
+    },
+  ] as const;
 </script>
 
-<section class="container hero">
-  <h1>The telly’s on. <span class="line2">Bring everyone.</span></h1>
+<section class="container hero" class:live-night={isLive}>
+  {#if isLive || loading}
+    <h1>The telly’s on. <span class="line2">Bring everyone.</span></h1>
+  {:else}
+    <h1>The telly’s off. <span class="line2">Not for long.</span></h1>
+  {/if}
   <div class="bars" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
-  <p class="lead">
-    Start a room when your show airs and share the invite link. Everyone gets their own bingo card and a live
-    chat, whether they’re on your sofa or across the country. No sign-up, and rooms vanish an hour after the
-    episode ends.
-  </p>
-  <p class="tonight" role="status">
-    {#if liveCount > 0}
-      <span class="dot" aria-hidden="true"></span>{liveCount === 1 ? 'One show' : `${liveCount} shows`} on air right
-      now.
-    {:else if SHOW_SLUGS.every((s) => doorState(s).kind !== 'loading')}
-      Nothing on air right now. Rooms open 30 minutes before each episode.
+  <p class="hook">You already shout at the telly. Now it’s a game.</p>
+  <div class="tonight" role="status">
+    {#if isLive}
+      <span class="dot" aria-hidden="true"></span>
+      <p>{listNames(liveSlugs.map(shortName))} {liveSlugs.length === 1 ? 'is' : 'are'} on now.</p>
+    {:else if loading}
+      <p class="quiet">Checking tonight’s schedule…</p>
+    {:else if unknownSlugs.length > 0}
+      <p>Couldn’t check tonight’s times. You can still open any show below.</p>
+      <button class="btn small secondary" type="button" onclick={() => load(unknownSlugs)}>Try again</button>
+    {:else if upNext}
+      <p>Nothing’s on just yet. Next up: {shortName(upNext.slug)}, {upNext.when}.</p>
+    {:else}
+      <p>Nothing’s on just yet. Rooms open half an hour before each episode.</p>
     {/if}
-  </p>
+  </div>
 </section>
+
+{#snippet pitch()}
+  <section class="container pitch" aria-label="How it works">
+    <p class="lead">
+      One of you starts a room when the show’s on and drops the link in the group chat. Everyone gets their
+      own bingo card of the show’s clichés, a chat that’s watching the same thing, and a vote on who’s going
+      home. Same sofa or opposite ends of the country, you’re all in the same room.
+    </p>
+    <div class="hero-telly">
+      <HeroTelly shows={tellyShows} />
+    </div>
+  </section>
+{/snippet}
 
 {#snippet door(slug: ShowSlug)}
   {@const d = doorState(slug)}
   {@const voice = VOICES[slug]}
   {#if d.kind === 'live' || d.kind === 'unknown'}
     <a class="door" class:live={d.kind === 'live'} href="/{slug}" data-world={SHOWS[slug].world}>
-      {#if d.kind === 'live'}
-        <span class="on-air" aria-hidden="true">On air</span>
-      {/if}
       <WorldEmblem show={slug} />
       <div class="copy">
+        {#if d.kind === 'live'}
+          <span class="on-air" aria-hidden="true">On air</span>
+        {/if}
         <h3>{shortName(slug)}</h3>
         <ChannelBadge show={slug} />
         <p class="tagline">{voice.tagline}</p>
@@ -103,8 +166,14 @@
       </div>
     </a>
   {:else}
-    <!-- Not on air: no rooms can exist yet, so the door is closed, not a link. -->
-    <div class="door off" data-world={SHOWS[slug].world} aria-label="{SHOWS[slug].name}, not on air">
+    <!-- Not on air (or not known yet): no rooms can exist, so the door is closed, not a link. -->
+    <div
+      class="door"
+      class:off={d.kind !== 'loading'}
+      class:pending={d.kind === 'loading'}
+      data-world={SHOWS[slug].world}
+      aria-label="{SHOWS[slug].name}, {d.kind === 'loading' ? 'checking the schedule' : 'not on air'}"
+    >
       {#if d.kind === 'next' && d.newSeries}
         <span class="new-series">New series</span>
       {/if}
@@ -135,8 +204,9 @@
   {/if}
 {/snippet}
 
-{#if liveSlugs.length > 0}
-  <section class="container group" aria-labelledby="on-air-now">
+<!-- A live night leads with the doors; any other night leads with the pitch. -->
+{#if isLive}
+  <section class="container group live-group" aria-labelledby="on-air-now">
     <h2 id="on-air-now" class="group-title">On air now</h2>
     <div class="doors live-doors">
       {#each liveSlugs as slug (slug)}{@render door(slug)}{/each}
@@ -144,27 +214,69 @@
   </section>
 {/if}
 
+{@render pitch()}
+
+{#if unknownSlugs.length > 0}
+  <section class="container group" aria-labelledby="times-unknown">
+    <h2 id="times-unknown" class="group-title">The shows <span class="aside">· times unavailable</span></h2>
+    <div class="doors rest-doors">
+      {#each unknownSlugs as slug (slug)}{@render door(slug)}{/each}
+    </div>
+  </section>
+{/if}
+
 {#if restSlugs.length > 0}
   <section class="container group" aria-labelledby="coming-up">
-    <h2 id="coming-up" class="group-title">{liveSlugs.length > 0 ? 'Coming up' : 'The shows'}</h2>
-    <div class="doors rest-doors" class:compact={liveSlugs.length > 0}>
+    <h2 id="coming-up" class="group-title">
+      {isLive || unknownSlugs.length > 0 ? 'Coming up' : 'The shows'}
+    </h2>
+    <div class="doors rest-doors">
       {#each restSlugs as slug (slug)}{@render door(slug)}{/each}
     </div>
   </section>
 {/if}
 
+<section class="container listings" aria-labelledby="running-order">
+  <h2 id="running-order" class="group-title">{tonight ? 'Tonight’s running order' : 'The running order'}</h2>
+  <ol>
+    {#each RUNNING_ORDER as slot (slot.title)}
+      <li>
+        <p class="slot-when">{slot.when}</p>
+        <div>
+          <h3>{slot.title}</h3>
+          <p>{slot.body}</p>
+        </div>
+      </li>
+    {/each}
+  </ol>
+</section>
+
 <style>
   .hero {
-    padding-top: clamp(40px, 9vw, 110px);
-    padding-bottom: clamp(24px, 4vw, 44px);
+    padding-top: clamp(32px, 7vw, 96px);
+    padding-bottom: clamp(20px, 3vw, 32px);
   }
   .hero h1 {
-    font-size: clamp(3rem, 11vw, 7.2rem);
+    font-size: clamp(3rem, 11vw, 6rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 0.92;
     max-width: 11ch;
     margin-bottom: 0.32em;
+  }
+  /* A live night is about the doors: the hero tightens so they arrive in the first screen. */
+  .hero.live-night {
+    padding-top: clamp(20px, 4vw, 56px);
+  }
+  .hero.live-night h1 {
+    font-size: clamp(2.6rem, 8vw, 4.6rem);
+  }
+  .hook {
+    margin: 0;
+    font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
   }
   .line2 {
     display: block;
@@ -174,11 +286,12 @@
   /* A telly test-card strip drawn from both worlds' colours. */
   /* The brand's test-card bars (src/client/lib/brand.ts BARS), the same seven as the logo's screen. */
   .bars {
+    grid-area: bars;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     width: min(100%, 560px);
     height: 14px;
-    margin-bottom: 28px;
+    margin-bottom: clamp(18px, 2.5vw, 28px);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -204,23 +317,62 @@
     background: #2c4bb0;
   }
 
+  /* The pitch: the lead beside the telly on wide screens, the telly under it on phones. */
+  .pitch {
+    display: grid;
+    gap: 24px;
+    align-items: center;
+    margin-top: clamp(28px, 4vw, 48px);
+  }
+  .live-group + .pitch {
+    margin-top: clamp(40px, 6vw, 72px);
+  }
   .lead {
     font-size: clamp(1.05rem, 2vw, 1.25rem);
-    max-width: 56ch;
+    max-width: 52ch;
     color: var(--muted);
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .hero-telly {
+    width: min(58%, 240px);
+    margin: 0 auto;
+  }
+  @media (min-width: 860px) {
+    .pitch {
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
+      column-gap: clamp(28px, 5vw, 72px);
+    }
+    .hero-telly {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 0 0 auto;
+    }
   }
   .tonight {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
+    gap: 8px 10px;
     min-height: 1.5em;
-    margin: 18px 0 0;
+    margin: 14px 0 0;
     font-weight: 700;
   }
+  .tonight p {
+    margin: 0;
+    flex: 0 1 auto;
+    text-wrap: pretty;
+  }
+  .tonight .quiet {
+    color: var(--muted);
+    font-weight: 500;
+  }
   .tonight .dot {
+    flex: none;
     width: 10px;
     height: 10px;
     border-radius: 50%;
+    animation: lamp-dot 2.6s ease-in-out infinite;
     background: #ff3b30;
     box-shadow: 0 0 0 3px rgb(255 59 48 / 0.25);
   }
@@ -305,24 +457,30 @@
     white-space: nowrap;
   }
 
-  /* Coming up: a compact secondary row. */
-  .rest-doors.compact {
+  /* Everything that isn't on: a compact row, so an off night isn't six screens of closed doors. */
+  .rest-doors {
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr));
   }
-  .rest-doors.compact .door {
+  .rest-doors .door {
     min-height: 0;
     gap: 6px;
     padding: 18px 20px 20px;
     flex-direction: column;
     align-items: flex-start;
   }
-  .rest-doors.compact :global(.emblem) {
+  .rest-doors :global(.emblem) {
     transform: scale(0.62);
     transform-origin: left top;
     margin: -4px 0 -52px;
   }
-  .rest-doors.compact h3 {
+  .rest-doors h3 {
     font-size: 1.45rem;
+  }
+  .aside {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.7em;
+    letter-spacing: 0;
   }
 
   .door h3 {
@@ -359,11 +517,10 @@
     font-size: 1.12rem;
   }
 
-  /* The studio ON AIR lamp: lit while a show is on. */
+  /* The studio ON AIR lamp: lit while a show is on. It sits above the title, so a long name never runs under it. */
   .on-air {
-    position: absolute;
-    top: 18px;
-    right: 18px;
+    display: inline-block;
+    margin-bottom: 14px;
     padding: 6px 12px 5px;
     border-radius: 6px;
     border: 2px solid #3a0b07;
@@ -379,6 +536,78 @@
       0 6px 22px rgb(227 38 27 / 0.55);
     animation: lamp 2.6s ease-in-out infinite;
   }
+  @keyframes lamp-dot {
+    50% {
+      box-shadow: 0 0 0 6px rgb(255 59 48 / 0.08);
+    }
+  }
+
+  /* Tonight's running order: a listings page, times on the left in the test-card colours. */
+  .listings {
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .listings ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--border);
+  }
+  .listings li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .slot-when {
+    margin: 0;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .listings li:nth-child(1) .slot-when {
+    color: #f2c230;
+  }
+  .listings li:nth-child(2) .slot-when {
+    color: #19d3c5;
+  }
+  .listings li:nth-child(3) .slot-when {
+    color: #ff2e93;
+  }
+  .listings li:nth-child(4) .slot-when {
+    color: #e6dfcd;
+  }
+  .listings h3 {
+    font-family: var(--font-body);
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+  }
+  .listings li p:not(.slot-when) {
+    margin: 0;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  @media (min-width: 720px) {
+    .listings li {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: 24px;
+      padding: 22px 0;
+    }
+    .slot-when {
+      padding-top: 0.5em;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tonight .dot,
+    .on-air {
+      animation: none;
+    }
+  }
+
   @keyframes lamp {
     50% {
       background: #c81e15;
@@ -402,6 +631,15 @@
   .door.off .copy {
     opacity: 0.78;
   }
+  /* Still checking: a solid, quiet door, so it never reads as closed before we know. */
+  .door.pending {
+    cursor: progress;
+    box-shadow: none;
+  }
+  .door.pending :global(.emblem),
+  .door.pending .copy {
+    opacity: 0.55;
+  }
 
   .new-series {
     position: absolute;
@@ -421,7 +659,6 @@
     .door {
       flex-direction: column;
       align-items: flex-start;
-      padding-top: 56px;
     }
     .door :global(.emblem) {
       align-self: center;

@@ -89,3 +89,36 @@ test('joining with a bad code shows a friendly error', async ({ page }) => {
   await page.getByRole('button', { name: 'Join room' }).click();
   await expect(page.getByRole('alert')).toContainText('match an open room');
 });
+
+test('predictions: open tally, then the host records who went', async ({ page, browser, problems }) => {
+  const url = await startRoom(page, 'traitors', 'Host');
+  const guest = await newGuardedPage(browser);
+  await joinRoom(guest.page, url, 'Guest');
+
+  // The local test series has no curated cast, so the host fills in the line-up (names render as text).
+  await openTab(page, 'Picks');
+  for (const name of ['Ada', XSS_NAME]) {
+    await page.getByLabel('Add someone to the line-up').fill(name);
+    await page.getByRole('button', { name: 'Add', exact: true }).click();
+  }
+
+  await openTab(guest.page, 'Picks');
+  const banish = guest.page.getByRole('region', { name: 'Who will be banished?' });
+  await banish.getByRole('button', { name: /^Ada/ }).click();
+  await expect(banish.getByRole('button', { name: /^Ada/ })).toHaveAttribute('aria-pressed', 'true');
+
+  // Everyone sees the tally as it happens.
+  const hostBanish = page.getByRole('region', { name: 'Who will be banished?' });
+  await expect(hostBanish.getByRole('button', { name: /^Ada/ })).toContainText('1');
+
+  await hostBanish.getByRole('button', { name: 'Record result' }).click();
+  await hostBanish.getByRole('button', { name: /^Ada/ }).click();
+  await expect(banish).toContainText('Banished');
+
+  await openTab(guest.page, 'Chat');
+  await expect(guest.page.getByRole('list', { name: 'Chat messages' })).toContainText(
+    'Ada has been banished from the castle. Guest called it.',
+  );
+  expect(guest.problems).toEqual([]);
+  expect(problems).toEqual([]);
+});

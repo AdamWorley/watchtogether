@@ -4,11 +4,27 @@
 //
 // Glossary (keep consistent): room · room code · invite link · host · mark · call · LINE · FULL HOUSE.
 import type { ClaimKind } from '../../shared/bingo';
+import type { QuestionId } from '../../shared/predictions';
 import { SHOWS, type ShowSlug, type WorldSlug } from '../../shared/shows';
 
 interface Titled {
   heading: string;
   body: string;
+}
+
+interface Ask {
+  /** The question above the line-up. */
+  ask: string;
+  /** Tag on the answer once the host records it. */
+  tag: string;
+  /** Feed line when the host records it. `right` is who called it (possibly nobody). */
+  verdict: (name: string, right: string[]) => string;
+}
+
+/** "Ana", "Ana and Ben", "Ana, Ben and Cal". */
+export function listNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? '';
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
 
 export interface ShowVoice {
@@ -48,7 +64,18 @@ export interface ShowVoice {
   finale: { title: string; line: (name: string) => string };
   /** Telly mode's leaderboard heading. */
   board: string;
+  /** The predictions panel. Only the questions the show asks (shared/predictions.ts) are used. */
+  predict: {
+    heading: string;
+    intro: string;
+    /** Shown when the line-up is empty. */
+    empty: string;
+    asks: Partial<Record<QuestionId, Ask>>;
+  };
 }
+
+const called = (right: string[], none: string) =>
+  right.length === 0 ? none : `${listNames(right)} called it.`;
 
 const REJOIN_BODY =
   'This room has closed, or your place in it has lapsed. Try joining again with the same link.';
@@ -111,6 +138,25 @@ const traitors = (show: string): ShowVoice => ({
   tally: { unit: 'fates turned', roman: true },
   finale: { title: 'The reading is complete', line: (name) => `${name} has turned every fate.` },
   board: 'The round table',
+  predict: {
+    heading: 'Cast your suspicions',
+    intro:
+      'Who dies at dawn, and who gets the boot at the round table? Pick now, and the host reveals the truth.',
+    empty: 'The castle’s guest list is blank. The host can add the players below.',
+    asks: {
+      murdered: {
+        ask: 'Who will be murdered?',
+        tag: 'Murdered',
+        verdict: (name, right) => `${name} has been murdered. ${called(right, 'Nobody saw it coming.')}`,
+      },
+      banished: {
+        ask: 'Who will be banished?',
+        tag: 'Banished',
+        verdict: (name, right) =>
+          `${name} has been banished from the castle. ${called(right, 'Not one of you suspected.')}`,
+      },
+    },
+  },
 });
 
 const strictly = (): ShowVoice => ({
@@ -166,6 +212,19 @@ const strictly = (): ShowVoice => ({
   tally: { unit: 'squares sewn', roman: false },
   finale: { title: 'A perfect ten!', line: (name) => `${name} has danced every square, darling.` },
   board: 'The leaderboard',
+  predict: {
+    heading: 'Place your bets, darlings',
+    intro: 'Who’s doing their last dance tonight? Make your pick, and the host reveals who’s waltzing home.',
+    empty: 'Nobody’s on the dancefloor yet. The host can add this year’s couples below.',
+    asks: {
+      leaves: {
+        ask: 'Who’s leaving the ballroom?',
+        tag: 'Waltzed home',
+        verdict: (name, right) =>
+          `${name} has left the ballroom. ${called(right, 'Nobody saw that one coming, darling.')}`,
+      },
+    },
+  },
 });
 
 const jungle = (): ShowVoice => ({
@@ -216,6 +275,18 @@ const jungle = (): ShowVoice => ({
   tally: { unit: 'stars earned', roman: false },
   finale: { title: 'Jungle royalty', line: (name) => `${name} has earned every star in camp.` },
   board: 'The camp board',
+  predict: {
+    heading: 'Who’s for the bridge?',
+    intro: 'Pick who you reckon gets voted out of camp tonight. The host reveals who’s crossing the bridge.',
+    empty: 'Camp’s empty so far. The host can add the campmates below.',
+    asks: {
+      leaves: {
+        ask: 'Who’s getting voted out?',
+        tag: 'Out of camp',
+        verdict: (name, right) => `${name} is out of camp. ${called(right, 'Nobody called that one.')}`,
+      },
+    },
+  },
 });
 
 const bakeoff = (): ShowVoice => ({
@@ -268,6 +339,24 @@ const bakeoff = (): ShowVoice => ({
   tally: { unit: 'squares iced', roman: false },
   finale: { title: 'Star Baker!', line: (name) => `${name} has iced every square.` },
   board: 'The bench',
+  predict: {
+    heading: 'Who’s getting the handshake?',
+    intro: 'Pick your Star Baker, and who’s hanging up their apron. The host reveals all after judging.',
+    empty: 'No bakers on the benches yet. The host can add them below.',
+    asks: {
+      star: {
+        ask: 'Who’ll be Star Baker?',
+        tag: 'Star Baker',
+        verdict: (name, right) => `${name} is Star Baker! ${called(right, 'Nobody saw that rising.')}`,
+      },
+      leaves: {
+        ask: 'Who’s leaving the tent?',
+        tag: 'Left the tent',
+        verdict: (name, right) =>
+          `${name} is leaving the tent. ${called(right, 'Nobody saw that one coming.')}`,
+      },
+    },
+  },
 });
 
 const ice = (): ShowVoice => ({
@@ -318,6 +407,19 @@ const ice = (): ShowVoice => ({
   tally: { unit: 'squares landed', roman: false },
   finale: { title: 'A perfect 6.0', line: (name) => `${name} has landed every square.` },
   board: 'The scoreboard',
+  predict: {
+    heading: 'Who’s in the skate-off?',
+    intro: 'Pick who you think skates off tonight. The host reveals who’s hanging up their boots.',
+    empty: 'Nobody on the ice yet. The host can add the skaters below.',
+    asks: {
+      leaves: {
+        ask: 'Who’s skating off?',
+        tag: 'Skated off',
+        verdict: (name, right) =>
+          `${name} has skated off. ${called(right, 'Nobody saw that wobble coming.')}`,
+      },
+    },
+  },
 });
 
 const WORLD_VOICES: Record<WorldSlug, (showName: string) => ShowVoice> = {

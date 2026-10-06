@@ -3,6 +3,7 @@
 import { z } from './zod';
 import { CELLS } from './bingo';
 import { cleanText, textLength } from './sanitize';
+import { CONTESTANT_MAX, LINEUP_MAX, QUESTION_IDS } from './predictions';
 import { SHOW_SLUGS } from './shows';
 import { EpisodeSchema } from './window';
 
@@ -32,6 +33,8 @@ const Cell = z
   .min(0)
   .max(CELLS - 1);
 const ClaimKind = z.enum(['line', 'house']);
+export const Question = z.enum(QUESTION_IDS);
+export const Contestant = userText(CONTESTANT_MAX);
 
 // ---------- HTTP ----------
 
@@ -61,6 +64,12 @@ export const ClientMessage = z.discriminatedUnion('t', [
   z.strictObject({ t: z.literal('chat'), text: ChatText }),
   z.strictObject({ t: z.literal('mark'), cell: Cell, marked: z.boolean() }),
   z.strictObject({ t: z.literal('claim'), kind: ClaimKind }),
+  /** Your prediction for a question; null takes it back. */
+  z.strictObject({ t: z.literal('pick'), q: Question, name: Contestant.nullable() }),
+  /** Host: what actually happened (null reopens the question). */
+  z.strictObject({ t: z.literal('verdict'), q: Question, name: Contestant.nullable() }),
+  /** Host: fix the line-up when the curated list is behind. */
+  z.strictObject({ t: z.literal('lineup'), op: z.enum(['add', 'remove']), name: Contestant }),
   z.strictObject({ t: z.literal('kick'), memberId: MemberId }),
   z.strictObject({ t: z.literal('lock'), locked: z.boolean() }),
   z.strictObject({ t: z.literal('filter'), enabled: z.boolean() }),
@@ -107,6 +116,14 @@ const Claim = z.strictObject({
 });
 export type Claim = z.infer<typeof Claim>;
 
+const Predictions = z.strictObject({
+  /** Who can be picked, in display order. */
+  lineup: z.array(z.string()).max(LINEUP_MAX),
+  picks: z.array(z.strictObject({ memberId: MemberId, q: Question, name: z.string() })),
+  verdicts: z.array(z.strictObject({ q: Question, name: z.string() })),
+});
+export type Predictions = z.infer<typeof Predictions>;
+
 const RoomState = z.strictObject({
   show: Show,
   episode: EpisodeSchema,
@@ -117,7 +134,7 @@ const RoomState = z.strictObject({
 });
 export type RoomState = z.infer<typeof RoomState>;
 
-export const SystemKind = z.enum(['join', 'leave', 'kick', 'lock', 'unlock', 'rotate', 'filter']);
+export const SystemKind = z.enum(['join', 'leave', 'kick', 'lock', 'unlock', 'rotate', 'filter', 'verdict']);
 
 export const ServerMessage = z.discriminatedUnion('t', [
   z.strictObject({
@@ -129,11 +146,20 @@ export const ServerMessage = z.discriminatedUnion('t', [
     members: z.array(Member),
     chat: z.array(ChatEntry),
     claims: z.array(Claim),
+    predictions: Predictions,
   }),
   z.strictObject({ t: z.literal('room'), room: RoomState }),
   z.strictObject({ t: z.literal('members'), members: z.array(Member) }),
   z.strictObject({ t: z.literal('chat'), entry: ChatEntry }),
-  z.strictObject({ t: z.literal('system'), kind: SystemKind, name: z.string().optional(), at: z.number() }),
+  z.strictObject({
+    t: z.literal('system'),
+    kind: SystemKind,
+    name: z.string().optional(),
+    /** With kind 'verdict': which question was answered (`name` is who). */
+    q: Question.optional(),
+    at: z.number(),
+  }),
+  z.strictObject({ t: z.literal('predictions'), predictions: Predictions }),
   z.strictObject({ t: z.literal('marks'), marks: z.array(Cell) }),
   z.strictObject({ t: z.literal('claim'), claim: Claim }),
   z.strictObject({ t: z.literal('closed'), reason: z.enum(['ended', 'kicked']) }),

@@ -3,7 +3,8 @@ import { runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
 import { FREE } from '../../src/shared/bingo';
 import { PROTOCOL } from '../../src/shared/protocol';
-import { connect, createRoom, joinRoom, post, upgrade } from './helpers';
+import { CAST } from '../../src/shared/content/cast';
+import { connect, createRoom, episodeAiring, joinRoom, post, seedSchedule, upgrade } from './helpers';
 
 const XSS = '<img src=x onerror=alert(1)><script>alert(1)</script>';
 
@@ -205,6 +206,87 @@ describe('host controls', () => {
   });
 });
 
+describe('predictions', () => {
+  it('starts with the curated line-up for this series, minus anyone already out', async () => {
+    const cast = CAST['celebrity-traitors']!;
+    await seedSchedule('celebrity-traitors', [{ ...episodeAiring(), season: cast.season }]);
+    const res = await post('/api/rooms', { show: 'celebrity-traitors', name: 'Host' });
+    const host = await connect(await res.json());
+    const { predictions } = await host.next('welcome');
+    const still = cast.people.filter((p) => !p.out).map((p) => p.name);
+    expect(predictions.lineup).toEqual(still);
+    expect(predictions.lineup).not.toContain(cast.people.find((p) => p.out)?.name);
+  });
+
+  it('starts empty when the curated list is for another series', async () => {
+    const room = await createRoom('strictly');
+    const host = await connect(room);
+    expect((await host.next('welcome')).predictions).toEqual({ lineup: [], picks: [], verdicts: [] });
+  });
+
+  it('shares an open tally, then locks picks when the host records the result', async () => {
+    const room = await createRoom();
+    const host = await connect(room);
+    const guest = await connect(await joinRoom(room.code, 'Guest'));
+    const { you } = await guest.next('welcome');
+    await host.next('welcome');
+
+    // Only the host can shape the line-up or record a result.
+    guest.send({ t: 'lineup', op: 'add', name: 'Nope' });
+    expect((await guest.next('error')).code).toBe('forbidden');
+    guest.send({ t: 'verdict', q: 'banished', name: 'Nope' });
+    expect((await guest.next('error')).code).toBe('forbidden');
+
+    host.send({ t: 'lineup', op: 'add', name: 'Ada' });
+    host.send({ t: 'lineup', op: 'add', name: 'Bo' });
+    host.send({ t: 'lineup', op: 'add', name: 'ada' }); // already there, case-insensitively
+    await guest.next('predictions', (m) => m.predictions.lineup.length === 2);
+
+    // Picks must be someone in the line-up and a question this show asks.
+    guest.send({ t: 'pick', q: 'banished', name: 'Zed' });
+    guest.send({ t: 'pick', q: 'star', name: 'Ada' });
+    guest.send({ t: 'pick', q: 'banished', name: 'ada' });
+    const tally = await host.next('predictions', (m) => m.predictions.picks.length > 0);
+    expect(tally.predictions.picks).toEqual([{ memberId: you.id, q: 'banished', name: 'Ada' }]);
+
+    host.send({ t: 'verdict', q: 'banished', name: 'Ada' });
+    const settled = await guest.next('predictions', (m) => m.predictions.verdicts.length > 0);
+    expect(settled.predictions.verdicts).toEqual([{ q: 'banished', name: 'Ada' }]);
+    const line = await guest.next('system', (m) => m.kind === 'verdict');
+    expect(line).toMatchObject({ name: 'Ada', q: 'banished' });
+
+    // Settled: no changing your mind, and the answer can't be removed from the line-up.
+    guest.send({ t: 'pick', q: 'banished', name: 'Bo' });
+    host.send({ t: 'lineup', op: 'remove', name: 'Ada' });
+    host.send({ t: 'pick', q: 'murdered', name: 'Bo' });
+    const after = await guest.next('predictions', (m) => m.predictions.picks.length === 2);
+    expect(after.predictions.lineup).toEqual(['Ada', 'Bo']);
+    expect(after.predictions.picks.find((x) => x.memberId === you.id)?.name).toBe('Ada');
+
+    // Removing someone from the line-up drops their picks.
+    host.send({ t: 'lineup', op: 'remove', name: 'Bo' });
+    const trimmed = await guest.next(
+      'predictions',
+      (m) => m.predictions.lineup.length === 1 && m.predictions.verdicts.length > 0,
+    );
+    expect(trimmed.predictions.picks.map((x) => x.name)).toEqual(['Ada']);
+  });
+
+  it('drops a removed member from the tally', async () => {
+    const room = await createRoom();
+    const host = await connect(room);
+    const guest = await connect(await joinRoom(room.code, 'Guest'));
+    const { you } = await guest.next('welcome');
+    await host.next('welcome');
+    host.send({ t: 'lineup', op: 'add', name: 'Ada' });
+    await guest.next('predictions');
+    guest.send({ t: 'pick', q: 'murdered', name: 'Ada' });
+    await host.next('predictions', (m) => m.predictions.picks.length === 1);
+    host.send({ t: 'kick', memberId: you.id });
+    await host.next('predictions', (m) => m.predictions.picks.length === 0);
+  });
+});
+
 describe('end of window', () => {
   it('closes every socket and wipes all room data', async () => {
     const room = await createRoom();
@@ -221,9 +303,10 @@ describe('end of window', () => {
     expect(await env.KV.get(`code:${room.code}`)).toBeNull();
     await runInDurableObject(stub, (_instance, state) => {
       expect(state.storage.kv.get('meta')).toBeUndefined();
+      expect(state.storage.kv.get('lineup')).toBeUndefined();
       const tables = state.storage.sql
         .exec<{ name: string }>(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('members','chat','claims')",
+          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('members','chat','claims','picks')",
         )
         .toArray();
       expect(tables).toEqual([]);

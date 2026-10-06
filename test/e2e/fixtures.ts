@@ -64,7 +64,7 @@ export async function joinRoom(page: Page, url: string, name: string): Promise<v
 }
 
 /** On phones the room is tabbed; on desktop all panels are visible. */
-export async function openTab(page: Page, tab: 'Bingo' | 'Chat' | 'People'): Promise<void> {
+export async function openTab(page: Page, tab: 'Bingo' | 'Chat' | 'Picks' | 'People'): Promise<void> {
   const button = page.getByRole('navigation', { name: 'Room sections' }).getByRole('button', { name: tab });
   if (await button.isVisible()) await button.click();
 }

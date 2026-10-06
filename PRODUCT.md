@@ -55,10 +55,15 @@ isn't affiliated with the BBC or the shows' producers. What makes it what it is:
   - Squares come from a per-show pool of about 50 clichés, curated by the owner in `src/shared/content/`.
   - Self-marked on the honour system. Calling LINE or FULL HOUSE is checked against your own marks and shown to
     the room with the card as evidence. The first caller is announced.
+- **Predictions.** Everyone picks who they think goes tonight (Traitors: murdered and banished; Bake Off: Star
+  Baker and who leaves; the others: who's voted or skated off). The tally is open: everyone sees who picked whom.
+  The host records what actually happened, which locks that question and tells the room who called it. The
+  line-up comes from `src/shared/content/cast.ts`, curated by the owner per series (mark leavers `out: true`);
+  the host can add or remove names in a room if it's behind. Picks vanish with the room like everything else.
 - **Chat.** Live text, up to 280 characters per message, with the last 100 messages kept. It's rate-limited.
   There's a display-only profanity filter the host can toggle.
 - **Host controls.** Remove a person (they're banned from the room), lock the room, rotate the code (old links
-  stop working) and toggle the filter. If the host leaves, nobody inherits these.
+  stop working), toggle the filter, fix the predictions line-up and record results. If the host leaves, nobody inherits these.
 - **Ephemeral by design.**
   - Names, chat and marks are deleted when the room closes.
   - There are no cookies or analytics.

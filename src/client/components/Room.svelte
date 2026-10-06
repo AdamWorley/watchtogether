@@ -12,6 +12,7 @@
   import Finale from './Finale.svelte';
   import Chat from './Chat.svelte';
   import People from './People.svelte';
+  import Predictions from './Predictions.svelte';
   import RoomRail from './RoomRail.svelte';
 
   let { conn, show }: { conn: RoomConnection; show: ShowSlug } = $props();
@@ -41,7 +42,7 @@
   );
   const online = $derived(conn.members.filter((m) => m.online).length);
 
-  type Tab = 'card' | 'chat' | 'people';
+  type Tab = 'card' | 'chat' | 'picks' | 'people';
   let tab = $state<Tab>('card');
   let tabsEl: HTMLElement | undefined = $state();
   let layoutEl: HTMLElement | undefined = $state();
@@ -201,6 +202,14 @@
     </button>
     <button
       type="button"
+      class:active={tab === 'picks'}
+      aria-pressed={tab === 'picks'}
+      onclick={() => openTab('picks')}
+    >
+      Picks
+    </button>
+    <button
+      type="button"
       class:active={tab === 'people'}
       aria-pressed={tab === 'people'}
       onclick={() => openTab('people')}
@@ -254,6 +263,10 @@
 
     <section class="panel chat-panel card" aria-label="Chat">
       <Chat {conn} {show} {mask} />
+    </section>
+
+    <section class="panel picks-panel card" aria-label="Predictions">
+      <Predictions {conn} {show} {mask} />
     </section>
 
     <section class="panel people-panel card" aria-label="People">
@@ -354,7 +367,9 @@
     color: var(--text);
     font: inherit;
     font-family: var(--font-display);
-    font-size: 1.05rem;
+    font-size: clamp(0.88rem, 3.7vw, 1.05rem);
+    white-space: nowrap;
+    padding: 0 4px;
     border-radius: var(--radius-control);
     cursor: pointer;
   }
@@ -393,12 +408,10 @@
     padding: 12px;
   }
   /* Phones: one tab at a time. */
-  .layout[data-tab='card'] .chat-panel,
-  .layout[data-tab='card'] .people-panel,
-  .layout[data-tab='chat'] .card-panel,
-  .layout[data-tab='chat'] .people-panel,
-  .layout[data-tab='people'] .card-panel,
-  .layout[data-tab='people'] .chat-panel {
+  .layout:not([data-tab='card']) .card-panel,
+  .layout:not([data-tab='chat']) .chat-panel,
+  .layout:not([data-tab='picks']) .picks-panel,
+  .layout:not([data-tab='people']) .people-panel {
     display: none;
   }
   /* Desktop: card and chat side by side, people underneath chat. */
@@ -410,6 +423,7 @@
       grid-template-columns: minmax(0, 3fr) minmax(320px, 2fr);
       grid-template-areas:
         'card chat'
+        'card picks'
         'card people';
       align-items: start;
     }
@@ -423,6 +437,10 @@
     .chat-panel {
       grid-area: chat;
       height: min(70dvh, 640px);
+    }
+    .picks-panel {
+      grid-area: picks;
+      flex-direction: column;
     }
     .people-panel {
       grid-area: people;
@@ -444,6 +462,7 @@
       grid-template-columns: 280px minmax(0, 1fr) minmax(320px, 380px);
       grid-template-areas:
         'rail card chat'
+        'rail card picks'
         'rail card people';
       gap: 24px;
     }

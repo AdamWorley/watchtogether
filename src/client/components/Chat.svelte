@@ -75,6 +75,11 @@
         </li>
       {:else if item.kind === 'claim'}
         <li class="claim">{voice.claim(display(item.claim.name), item.claim.kind, item.claim.first)}</li>
+      {:else if item.kind === 'verdict'}
+        <li class="claim">
+          {voice.predict.asks[item.q]?.verdict(display(item.name), item.right.map(display)) ??
+            display(item.name)}
+        </li>
       {:else if item.kind === 'system'}
         <li class="system">{systemLine(item)}</li>
       {/if}

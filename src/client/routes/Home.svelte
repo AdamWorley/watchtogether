@@ -2,11 +2,12 @@
   import { shortName, SHOW_SLUGS, SHOWS, type ShowSlug } from '../../shared/shows';
   import { episodeWindow, liveEpisode, nextEpisode, type Episode } from '../../shared/window';
   import ChannelBadge from '../components/ChannelBadge.svelte';
+  import HeroTelly from '../components/HeroTelly.svelte';
   import WorldEmblem from '../components/WorldEmblem.svelte';
   import { getSchedule } from '../lib/api';
   import { useClock } from '../lib/clock.svelte';
   import { formatDuration, formatTime, formatWhen } from '../lib/format';
-  import { VOICES } from '../lib/voice';
+  import { listNames, VOICES } from '../lib/voice';
 
   const clock = useClock();
   // undefined = still loading, null = couldn't load (the door then stays a plain link).
@@ -38,7 +39,7 @@
     return { kind: 'dark' };
   }
 
-  const liveCount = $derived(SHOW_SLUGS.filter((s) => doorState(s).kind === 'live').length);
+  const loaded = $derived(SHOW_SLUGS.every((s) => doorState(s).kind !== 'loading'));
 
   // Live shows first, then whatever airs soonest, then shows off the air.
   function rank(slug: ShowSlug): number {
@@ -53,6 +54,37 @@
   const opens = (slug: ShowSlug) => ['live', 'unknown'].includes(doorState(slug).kind);
   const liveSlugs = $derived(ordered.filter(opens));
   const restSlugs = $derived(ordered.filter((slug) => !opens(slug)));
+  const onNow = $derived(ordered.filter((slug) => doorState(slug).kind === 'live'));
+  // The soonest show that isn't on yet, for "Next up".
+  const upNext = $derived.by(() => {
+    const slug = ordered.find((s) => doorState(s).kind === 'next');
+    const d = slug ? doorState(slug) : undefined;
+    return slug && d?.kind === 'next' ? { slug, episode: d.episode } : undefined;
+  });
+
+  // Tonight, as a TV listings page: what happens when, from doors open to lights out.
+  const RUNNING_ORDER = [
+    {
+      when: 'Half an hour before',
+      title: 'Doors open',
+      body: 'Start a room and drop the link in the group chat. Everyone’s in with just a name. No sign-ups, no apps, no faff.',
+    },
+    {
+      when: 'On air',
+      title: 'Eyes down',
+      body: 'Everyone gets their own bingo card of the show’s clichés. Mark them as they land, call LINE before anyone else, then be insufferable about it in the chat.',
+    },
+    {
+      when: 'Before the verdict',
+      title: 'Place your bets',
+      body: 'Who’s getting banished? Murdered? Sent home? Who’s Star Baker? Everyone picks, the tally’s there for all to see, and the host reveals who called it.',
+    },
+    {
+      when: 'An hour after',
+      title: 'Lights out',
+      body: 'The room closes, and the chat, the cards and every terrible take are deleted for good. Same time next week?',
+    },
+  ] as const;
 </script>
 
 <section class="container hero">
@@ -60,19 +92,34 @@
   <div class="bars" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
-  <p class="lead">
-    Start a room when your show airs and share the invite link. Everyone gets their own bingo card and a live
-    chat, whether they’re on your sofa or across the country. No sign-up, and rooms vanish an hour after the
-    episode ends.
-  </p>
-  <p class="tonight" role="status">
-    {#if liveCount > 0}
-      <span class="dot" aria-hidden="true"></span>{liveCount === 1 ? 'One show' : `${liveCount} shows`} on air right
-      now.
-    {:else if SHOW_SLUGS.every((s) => doorState(s).kind !== 'loading')}
-      Nothing on air right now. Rooms open 30 minutes before each episode.
-    {/if}
-  </p>
+  <div class="pitch">
+    <p class="lead">
+      <strong>You already shout at the telly. Now you can score points for it.</strong>
+      Everyone in your group gets a bingo card of the show’s clichés, a chat that’s watching the same thing, and
+      a vote on who’s going home. Same sofa or opposite ends of the country, you’re all in the same room.
+    </p>
+    <p class="tonight" role="status">
+      {#if onNow.length > 0}
+        <span class="dot" aria-hidden="true"></span>
+        <span
+          >{listNames(onNow.map(shortName))}
+          {onNow.length === 1 ? 'is' : 'are'} on right now. Get the kettle on.</span
+        >
+      {:else if loaded && upNext}
+        <span
+          >Nothing’s on just yet. Next up: {shortName(upNext.slug)}, {formatWhen(
+            Date.parse(upNext.episode.airstamp),
+            clock.now,
+          )}.</span
+        >
+      {:else if loaded}
+        <span>Nothing’s on just yet. Rooms open half an hour before each episode.</span>
+      {/if}
+    </p>
+  </div>
+  <div class="hero-telly">
+    <HeroTelly />
+  </div>
 </section>
 
 {#snippet door(slug: ShowSlug)}
@@ -153,18 +200,60 @@
   </section>
 {/if}
 
+<section class="container listings" aria-labelledby="running-order">
+  <h2 id="running-order" class="group-title">Tonight’s running order</h2>
+  <ol>
+    {#each RUNNING_ORDER as slot (slot.title)}
+      <li>
+        <p class="slot-when">{slot.when}</p>
+        <div>
+          <h3>{slot.title}</h3>
+          <p>{slot.body}</p>
+        </div>
+      </li>
+    {/each}
+  </ol>
+</section>
+
 <style>
   .hero {
-    padding-top: clamp(40px, 9vw, 110px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'title' 'bars' 'pitch' 'telly';
+    padding-top: clamp(32px, 7vw, 96px);
     padding-bottom: clamp(24px, 4vw, 44px);
   }
   .hero h1 {
-    font-size: clamp(3rem, 11vw, 7.2rem);
+    grid-area: title;
+    font-size: clamp(3rem, 11vw, 6rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 0.92;
     max-width: 11ch;
     margin-bottom: 0.32em;
+  }
+  .pitch {
+    grid-area: pitch;
+  }
+  .hero-telly {
+    grid-area: telly;
+    width: min(58%, 240px);
+    margin: 24px auto 0;
+  }
+  /* Wide screens: the telly sits beside the pitch, under the headline's right-hand end. */
+  @media (min-width: 860px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.62fr);
+      grid-template-areas: 'title title' 'bars telly' 'pitch telly';
+      column-gap: clamp(28px, 5vw, 72px);
+      align-items: start;
+    }
+    .hero-telly {
+      width: 100%;
+      max-width: 400px;
+      margin: -40px 0 0 auto;
+      align-self: start;
+    }
   }
   .line2 {
     display: block;
@@ -174,6 +263,7 @@
   /* A telly test-card strip drawn from both worlds' colours. */
   /* The brand's test-card bars (src/client/lib/brand.ts BARS), the same seven as the logo's screen. */
   .bars {
+    grid-area: bars;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     width: min(100%, 560px);
@@ -206,21 +296,35 @@
 
   .lead {
     font-size: clamp(1.05rem, 2vw, 1.25rem);
-    max-width: 56ch;
+    max-width: 52ch;
     color: var(--muted);
+    margin: 0;
+    text-wrap: pretty;
+  }
+  .lead strong {
+    display: block;
+    margin-bottom: 0.35em;
+    color: var(--text);
+    font-size: 1.12em;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
   }
   .tonight {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 10px;
     min-height: 1.5em;
-    margin: 18px 0 0;
+    margin: 20px 0 0;
     font-weight: 700;
   }
   .tonight .dot {
+    flex: none;
+    align-self: center;
     width: 10px;
     height: 10px;
     border-radius: 50%;
+    animation: lamp-dot 2.6s ease-in-out infinite;
     background: #ff3b30;
     box-shadow: 0 0 0 3px rgb(255 59 48 / 0.25);
   }
@@ -379,6 +483,78 @@
       0 6px 22px rgb(227 38 27 / 0.55);
     animation: lamp 2.6s ease-in-out infinite;
   }
+  @keyframes lamp-dot {
+    50% {
+      box-shadow: 0 0 0 6px rgb(255 59 48 / 0.08);
+    }
+  }
+
+  /* Tonight's running order: a listings page, times on the left in the test-card colours. */
+  .listings {
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .listings ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--border);
+  }
+  .listings li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .slot-when {
+    margin: 0;
+    font-weight: 800;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+  .listings li:nth-child(1) .slot-when {
+    color: #f2c230;
+  }
+  .listings li:nth-child(2) .slot-when {
+    color: #19d3c5;
+  }
+  .listings li:nth-child(3) .slot-when {
+    color: #ff2e93;
+  }
+  .listings li:nth-child(4) .slot-when {
+    color: #e6dfcd;
+  }
+  .listings h3 {
+    font-family: var(--font-body);
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+  }
+  .listings li p:not(.slot-when) {
+    margin: 0;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  @media (min-width: 720px) {
+    .listings li {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: 24px;
+      padding: 22px 0;
+    }
+    .slot-when {
+      padding-top: 0.5em;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tonight .dot,
+    .on-air {
+      animation: none;
+    }
+  }
+
   @keyframes lamp {
     50% {
       background: #c81e15;

@@ -2,6 +2,8 @@ import { DurableObject } from 'cloudflare:workers';
 import { bestLine, cardKey, generateCard, isValidClaim, type ClaimKind } from '../shared/bingo';
 import { generateCode, generateToken, TOKEN_RE } from '../shared/codes';
 import { SQUARES } from '../shared/content';
+import { startingLineup } from '../shared/content/cast';
+import { LINEUP_MAX, questionsFor, sameName, type QuestionId } from '../shared/predictions';
 import {
   CHAT_HISTORY,
   ClientMessage,
@@ -12,6 +14,7 @@ import {
   type ChatEntry,
   type Claim,
   type Member,
+  type Predictions,
   type RoomState,
   type ServerMessage,
 } from '../shared/protocol';
@@ -120,6 +123,12 @@ export class Room extends DurableObject<Env> {
         text TEXT NOT NULL,
         at INTEGER NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS picks (
+        member_id TEXT NOT NULL,
+        q TEXT NOT NULL,
+        name TEXT NOT NULL,
+        PRIMARY KEY (member_id, q)
+      );
       CREATE TABLE IF NOT EXISTS claims (
         member_id TEXT NOT NULL,
         kind TEXT NOT NULL,
@@ -173,6 +182,7 @@ export class Room extends DurableObject<Env> {
         locked: false,
         filter: true,
       });
+      this.setLineup(startingLineup(input.show, input.episode.season));
       await this.ctx.storage.setAlarm(input.closesAt);
       const result = await this.addMember(input.hostName, true);
       if (!result.ok) throw new Error('could not add host');
@@ -304,6 +314,7 @@ export class Room extends DurableObject<Env> {
       members: this.members(),
       chat: this.chatHistory(),
       claims: this.claims(),
+      predictions: this.predictions(meta),
     });
     this.broadcastMembers();
     log('room.connect', { members: this.ctx.getWebSockets().length });
@@ -366,6 +377,10 @@ export class Room extends DurableObject<Env> {
         return this.onMark(member, msg.cell, msg.marked);
       case 'claim':
         return this.onClaim(ws, member, msg.kind);
+      case 'pick':
+        return this.onPick(meta, member, msg.q, msg.name);
+      case 'verdict':
+      case 'lineup':
       case 'kick':
       case 'lock':
       case 'filter':
@@ -374,7 +389,9 @@ export class Room extends DurableObject<Env> {
           this.send(ws, { t: 'error', code: 'forbidden' });
           return;
         }
-        if (msg.t === 'kick') return this.onKick(member, msg.memberId);
+        if (msg.t === 'verdict') return this.onVerdict(meta, msg.q, msg.name);
+        if (msg.t === 'lineup') return this.onLineup(meta, msg.op, msg.name);
+        if (msg.t === 'kick') return this.onKick(meta, member, msg.memberId);
         if (msg.t === 'lock') return this.onLock(meta, msg.locked);
         if (msg.t === 'filter') return this.onFilter(meta, msg.enabled);
         return this.onRotate(meta);
@@ -457,7 +474,100 @@ export class Room extends DurableObject<Env> {
     this.broadcast({ t: 'claim', claim });
   }
 
-  private onKick(host: MemberRow, targetId: string): void {
+  // ---------------------------------------------------------------- predictions
+
+  private lineup(): string[] {
+    return this.ctx.storage.kv.get<string[]>('lineup') ?? [];
+  }
+
+  private setLineup(lineup: string[]): void {
+    this.ctx.storage.kv.put('lineup', lineup);
+  }
+
+  private verdicts(): Partial<Record<QuestionId, string>> {
+    return this.ctx.storage.kv.get<Partial<Record<QuestionId, string>>>('verdicts') ?? {};
+  }
+
+  /** The line-up's own spelling of a name, or undefined if they aren't in it. */
+  private inLineup(name: string): string | undefined {
+    return this.lineup().find((n) => sameName(n, name));
+  }
+
+  private onPick(meta: Meta, member: MemberRow, q: QuestionId, name: string | null): void {
+    // Once the host has said what happened, the question is settled: no changing your mind.
+    if (!questionsFor(meta.show).includes(q) || this.verdicts()[q] !== undefined) return;
+    if (name === null) {
+      this.sql.exec('DELETE FROM picks WHERE member_id = ? AND q = ?', member.id, q);
+    } else {
+      const known = this.inLineup(name);
+      if (!known) return;
+      this.sql.exec(
+        'INSERT INTO picks (member_id, q, name) VALUES (?, ?, ?) ON CONFLICT (member_id, q) DO UPDATE SET name = excluded.name',
+        member.id,
+        q,
+        known,
+      );
+    }
+    this.broadcastPredictions(meta);
+  }
+
+  private onVerdict(meta: Meta, q: QuestionId, name: string | null): void {
+    if (!questionsFor(meta.show).includes(q)) return;
+    const verdicts = this.verdicts();
+    if (name === null) {
+      if (verdicts[q] === undefined) return;
+      delete verdicts[q];
+      this.ctx.storage.kv.put('verdicts', verdicts);
+      this.broadcastPredictions(meta);
+      return;
+    }
+    const known = this.inLineup(name);
+    if (!known || verdicts[q] === known) return;
+    verdicts[q] = known;
+    this.ctx.storage.kv.put('verdicts', verdicts);
+    // Predictions first, so everyone already has the final picks when the verdict lands in the feed.
+    this.broadcastPredictions(meta);
+    this.broadcast({ t: 'system', kind: 'verdict', name: known, q, at: Date.now() });
+  }
+
+  private onLineup(meta: Meta, op: 'add' | 'remove', name: string): void {
+    const lineup = this.lineup();
+    const known = this.inLineup(name);
+    if (op === 'add') {
+      if (known || lineup.length >= LINEUP_MAX) return;
+      this.setLineup([...lineup, name]);
+    } else {
+      // Someone named in a verdict stays: they're the answer.
+      if (!known || Object.values(this.verdicts()).some((v) => v === known)) return;
+      this.setLineup(lineup.filter((n) => n !== known));
+      this.sql.exec('DELETE FROM picks WHERE name = ?', known);
+    }
+    this.broadcastPredictions(meta);
+  }
+
+  private predictions(meta: Meta): Predictions {
+    const asked = questionsFor(meta.show);
+    const verdicts = this.verdicts();
+    return {
+      lineup: this.lineup(),
+      picks: this.sql
+        .exec<{ member_id: string; q: string; name: string }>(
+          `SELECT p.member_id, p.q, p.name FROM picks p JOIN members m ON m.id = p.member_id
+           WHERE m.banned = 0 ORDER BY m.joined_at`,
+        )
+        .toArray()
+        .map((r) => ({ memberId: r.member_id, q: r.q as QuestionId, name: r.name })),
+      verdicts: asked.flatMap((q) => (verdicts[q] === undefined ? [] : [{ q, name: verdicts[q] }])),
+    };
+  }
+
+  private broadcastPredictions(meta: Meta): void {
+    this.broadcast({ t: 'predictions', predictions: this.predictions(meta) });
+  }
+
+  // ---------------------------------------------------------------- moderation
+
+  private onKick(meta: Meta, host: MemberRow, targetId: string): void {
     if (targetId === host.id) return;
     const target = this.member(targetId);
     if (!target || target.banned) return;
@@ -468,6 +578,10 @@ export class Room extends DurableObject<Env> {
     }
     this.broadcast({ t: 'system', kind: 'kick', name: target.name, at: Date.now() });
     this.broadcastMembers();
+    // A removed person's picks leave the tally with them.
+    if (this.sql.exec('SELECT 1 FROM picks WHERE member_id = ?', targetId).toArray().length > 0) {
+      this.broadcastPredictions(meta);
+    }
   }
 
   private onLock(meta: Meta, locked: boolean): void {

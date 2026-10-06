@@ -29,3 +29,10 @@ The user asked for a punchier home page, an "On air" flourish for live shows, fa
 - The headline is set at poster scale (up to 7.2rem, 800 weight), with "Bring everyone." in chrome yellow, over a telly test-card strip of eight bars drawn from both worlds' colours. A status line under the intro says how many shows are on air.
 - A live door is a link, edged in its world accent and glowing, with a lit studio ON AIR lamp (red, slow breath) in its top-right corner and "Series premiere / Series N, episode N · rooms open until HH:MM".
 - An off-air door is not a link: dashed edge, emblem greyscaled, copy dimmed. It shows "Next on <day, time>" (or "Series N starts …" for a new series) and "Rooms open at HH:MM · in <duration>". A new series adds a tilted "New series" tag in the world accent. With no episodes scheduled it reads "Off air until the next series is announced".
+
+## Amendment (user request, 2026-10-06)
+
+The user found the lobby bland and the copy a flat description. Bolder in the lobby's own vocabulary (the brand telly and the test card), with no new fonts or colours:
+- The headline spans the full width (capped at 6rem). The lead opens with a bold hook ("You already shout at the telly. Now you can score points for it.") and names the three things you get, predictions included. The status line names the shows on air or the next one up.
+- The brand telly at hero scale (`HeroTelly.svelte`) flicks channels every 3.6s: a lobby-written line someone will shout at the screen, set as a broadcast subtitle over the dimmed test card, with a green on-screen channel number. Changing channel collapses the picture to a bright line and opens it out again. Under reduced motion it holds on the first channel.
+- After the doors, "Tonight's running order" is a TV-listings list: Doors open, Eyes down, Place your bets, Lights out.

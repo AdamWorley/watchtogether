@@ -13,6 +13,19 @@ updates:
       dev-tooling:
         dependency-type: development
         update-types: [minor, patch]
+    # Majors the toolchain can't take yet. Remove each entry once its blocker supports it.
+    ignore:
+      # @cloudflare/vitest-plugin peers vitest ^4.1 (coverage-istanbul must match vitest).
+      - dependency-name: vitest
+        update-types: [version-update:semver-major]
+      - dependency-name: '@vitest/*'
+        update-types: [version-update:semver-major]
+      # typescript-eslint peers typescript <6.1; svelte-check peers ^5 || ^6.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # Types track the Node major CI runs (.nvmrc); bump with .nvmrc once a newer line is LTS.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:

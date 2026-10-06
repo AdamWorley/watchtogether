@@ -466,6 +466,15 @@ Motion uses `cubic-bezier(0.16, 1, 0.3, 1)` with no overshoot. The overlay close
 
 "Save my card" draws a 1080×1350 PNG on the device; nothing is uploaded. It reads the live world tokens and display face. It shows the card with marked tiles in the accent colour, the tally (roman numerals for Traitors), the player's calls and a watchtogether.uk date line. On phones it opens the share sheet, and elsewhere it downloads the file. It is offered in the room and on the ended screen.
 
+### Channel Badge
+
+The channel badge shows where a show airs, on the show page under the tagline and on every lobby door under the title.
+
+- **Shape:** the channel's own logo (BBC One, ITV1 or Channel 4), self-hosted as a minimal single-path SVG.
+- **Colour:** never in brand colours. It is drawn as a CSS mask over `currentColor` at 85% opacity, so it takes each world's text colour and reads on every ground.
+- **Size:** a per-channel height balances the marks' optical size: BBC One 2.1em (two rows), ITV1 1.35em, Channel 4 1.9em.
+- **Accessibility:** `role="img"` with the label "On BBC One" (and so on).
+
 ### World Emblem and Lobby Door
 
 Each world has a decorative, `aria-hidden` emblem: three fanned tarot cards, a sequin swatch with a score paddle, a hanging camp sign, a cake seen from above with a rosette, or a rink with a 6.0 score and glints. On the show page and on its home door, the emblem reacts to hover and focus with its world's move.

@@ -3,7 +3,7 @@
 //
 //   node scripts/seed-live.mjs                  # both shows on air now
 //   node scripts/seed-live.mjs traitors strictly:new   # traitors live, strictly's new series starts in 3 days
-//   modes: live (default) · next (next episode in 2 days) · new (new series in 3 days) · off (no episodes)
+//   modes: live (default) · today (next episode in 2 hours) · next (next episode in 2 days) · new (new series in 3 days) · off (no episodes)
 import { execFileSync } from 'node:child_process';
 
 const args = process.argv.slice(2).length ? process.argv.slice(2) : ['traitors', 'strictly'];
@@ -24,6 +24,10 @@ const MODES = {
       runtime: 60,
     },
     { id: -10 - i, name: 'Next week', season: 1, number: 2, airstamp: at(now + 7 * DAY), runtime: 60 },
+  ],
+  // Later today (2 hours away, so rooms aren't open yet). After 22:00 UK time this lands tomorrow.
+  today: (i) => [
+    { id: -40 - i, name: 'Episode 5', season: 1, number: 5, airstamp: at(now + 2 * 3600_000), runtime: 60 },
   ],
   next: (i) => [
     { id: -20 - i, name: 'Episode 4', season: 1, number: 4, airstamp: at(now + 2 * DAY), runtime: 60 },

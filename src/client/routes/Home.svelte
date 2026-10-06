@@ -1,10 +1,11 @@
 <script lang="ts">
   import { shortName, SHOW_SLUGS, SHOWS, type ShowSlug } from '../../shared/shows';
   import { episodeWindow, liveEpisode, nextEpisode, type Episode } from '../../shared/window';
+  import ChannelBadge from '../components/ChannelBadge.svelte';
   import WorldEmblem from '../components/WorldEmblem.svelte';
   import { getSchedule } from '../lib/api';
   import { useClock } from '../lib/clock.svelte';
-  import { formatDay, formatDuration, formatTime } from '../lib/format';
+  import { formatDuration, formatTime, formatWhen } from '../lib/format';
   import { VOICES } from '../lib/voice';
 
   const clock = useClock();
@@ -85,6 +86,7 @@
       <WorldEmblem show={slug} />
       <div class="copy">
         <h3>{shortName(slug)}</h3>
+        <ChannelBadge show={slug} />
         <p class="tagline">{voice.tagline}</p>
         {#if d.kind === 'live'}
           <p class="when">
@@ -109,13 +111,18 @@
       <WorldEmblem show={slug} />
       <div class="copy">
         <h3>{shortName(slug)}</h3>
+        <ChannelBadge show={slug} />
         {#if d.kind === 'loading'}
           <p class="when">Checking the schedule…</p>
         {:else if d.kind === 'next'}
           {@const w = episodeWindow(d.episode)}
+          {@const when = formatWhen(Date.parse(d.episode.airstamp), clock.now)}
           <p class="when">
-            {d.newSeries ? `Series ${d.episode.season} starts` : 'Next on'}
-            {formatDay(Date.parse(d.episode.airstamp))}
+            {d.newSeries
+              ? `Series ${d.episode.season} starts ${when}`
+              : when.startsWith('today')
+                ? `On ${when}`
+                : `Next on ${when}`}
           </p>
           <p class="opens">
             Rooms open at {formatTime(w.opensAt)} · in {formatDuration(w.opensAt - clock.now)}

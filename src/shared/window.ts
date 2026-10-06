@@ -83,3 +83,15 @@ export function demoEpisode(now: number): Episode {
     runtime: 60,
   };
 }
+
+const londonDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Europe/London',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** True when both instants fall on the same UK calendar day (BST/GMT aware). */
+export function sameLondonDay(a: number, b: number): boolean {
+  return londonDate.format(a) === londonDate.format(b);
+}

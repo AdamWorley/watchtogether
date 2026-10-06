@@ -5,6 +5,7 @@ import {
   EpisodeSchema,
   liveEpisode,
   nextEpisode,
+  sameLondonDay,
   type Episode,
 } from '../../src/shared/window';
 
@@ -90,5 +91,15 @@ describe('demoEpisode (Previews only)', () => {
 
   it('passes the episode schema', () => {
     expect(EpisodeSchema.safeParse(demoEpisode(Date.now())).success).toBe(true);
+  });
+});
+
+describe('sameLondonDay', () => {
+  it('compares UK calendar days, not UTC ones', () => {
+    // 23:30 UTC in October is 00:30 BST the next day.
+    expect(sameLondonDay(Date.parse('2026-10-06T23:30:00Z'), Date.parse('2026-10-06T12:00:00Z'))).toBe(false);
+    expect(sameLondonDay(Date.parse('2026-10-06T22:30:00Z'), Date.parse('2026-10-06T00:00:00Z'))).toBe(true);
+    // In winter (GMT) London and UTC days line up.
+    expect(sameLondonDay(Date.parse('2026-12-01T23:30:00Z'), Date.parse('2026-12-01T00:30:00Z'))).toBe(true);
   });
 });

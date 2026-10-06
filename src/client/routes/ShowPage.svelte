@@ -5,9 +5,10 @@
   import NameForm from '../components/NameForm.svelte';
   import WorldEmblem from '../components/WorldEmblem.svelte';
   import CardTaster from '../components/CardTaster.svelte';
+  import ChannelBadge from '../components/ChannelBadge.svelte';
   import { createRoom, errorMessage, getSchedule } from '../lib/api';
   import { useClock } from '../lib/clock.svelte';
-  import { formatDay, formatDuration, formatTime } from '../lib/format';
+  import { formatDuration, formatTime, formatWhen } from '../lib/format';
   import { router } from '../lib/router.svelte';
   import { saveSession } from '../lib/session';
   import { VOICES } from '../lib/voice';
@@ -56,6 +57,7 @@
   <div class="intro">
     <h1>{SHOWS[show].name}</h1>
     <p class="muted tagline">{voice.tagline}</p>
+    <ChannelBadge {show} />
   </div>
   <WorldEmblem {show} />
 </section>
@@ -81,7 +83,8 @@
       <h2>{voice.nextHeading}</h2>
       <p>{label(next)}</p>
       <p class="muted">
-        Airs {formatDay(Date.parse(next.airstamp))}. Rooms open at {formatTime(w.opensAt)}, 30 minutes before.
+        Airs {formatWhen(Date.parse(next.airstamp), clock.now)}. Rooms open at {formatTime(w.opensAt)}, 30
+        minutes before.
       </p>
       <p class="countdown" aria-live="off">
         <span class="countdown-label">Rooms open in</span>

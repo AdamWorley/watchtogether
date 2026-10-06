@@ -1,26 +1,46 @@
 <script lang="ts">
+  import { shortName, SHOW_SLUGS, type ShowSlug } from '../../shared/shows';
   import { BARS, MARK } from '../lib/brand';
 
-  // The brand telly at hero scale, flicking between channels. Each channel shows a line someone in your
-  // group will shout at the screen tonight, set as a broadcast subtitle over the test card.
-  const CHANNELS = [
-    { show: 'The Celebrity Traitors', line: '“I’m one hundred percent Faithful.”' },
-    { show: 'Bake Off', line: '“Is that… a soggy bottom?”' },
-    { show: 'Strictly', line: '“Seven? SEVEN? That was a ten!”' },
-    { show: 'I’m a Celeb', line: '“Not the bush tucker trial again.”' },
-    { show: 'The Traitors', line: '“I swear on my children’s lives.”' },
-    { show: 'Dancing on Ice', line: '“She’s down! No, she’s up!”' },
-    { show: 'Bake Off', line: '“Ten minutes left, bakers!”' },
-    { show: 'Strictly', line: '“Keep dancing!”' },
-  ] as const;
+  interface Props {
+    /** Shows to quote, most relevant first (what's on, then what's next). Empty: every show. */
+    shows?: readonly ShowSlug[];
+  }
 
-  let index = $state(0);
-  const channel = $derived(CHANNELS[index] ?? CHANNELS[0]);
+  let { shows = [] }: Props = $props();
+
+  // The brand telly at hero scale, flicking between channels. Each channel shows a line someone in your
+  // group will shout at the screen, set as a broadcast subtitle over the test card.
+  const LINES: Record<ShowSlug, readonly string[]> = {
+    'celebrity-traitors': ['“I’m one hundred percent Faithful.”', '“There’s a Traitor at this table.”'],
+    traitors: ['“I swear on my children’s lives.”', '“I’ve got a gut feeling.”'],
+    strictly: ['“Seven? SEVEN? That was a ten!”', '“Keep dancing!”'],
+    'im-a-celeb': ['“Not the bush tucker trial again.”', '“I’m a celebrity, get me out of here!”'],
+    'bake-off': ['“Is that… a soggy bottom?”', '“Ten minutes left, bakers!”'],
+    'dancing-on-ice': ['“She’s down! No, she’s up!”', '“That lift! Hold it… hold it…”'],
+  };
+
+  // Deal the lines round-robin, so the same show never plays twice in a row.
+  const channels = $derived.by(() => {
+    const list = shows.length > 0 ? shows : SHOW_SLUGS;
+    const out: { show: string; line: string }[] = [];
+    for (let round = 0; round < 2; round++) {
+      for (const slug of list) {
+        const line = LINES[slug][round];
+        if (line) out.push({ show: shortName(slug), line });
+      }
+    }
+    return out;
+  });
+
+  let tick = $state(0);
+  const index = $derived(tick % channels.length);
+  const channel = $derived(channels[index]);
 
   $effect(() => {
     // Reduced motion: hold on the first channel.
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const timer = setInterval(() => (index = (index + 1) % CHANNELS.length), 3600);
+    const timer = setInterval(() => tick++, 3600);
     return () => clearInterval(timer);
   });
 </script>
@@ -60,10 +80,12 @@
           {#each BARS as colour (colour)}<span></span>{/each}
         </div>
         <span class="osd">CH {index + 1}</span>
-        <p class="sub">
-          <span class="who">{channel.show}</span>
-          <span class="line">{channel.line}</span>
-        </p>
+        {#if channel}
+          <p class="sub">
+            <span class="who">{channel.show}</span>
+            <span class="line">{channel.line}</span>
+          </p>
+        {/if}
       </div>
     {/key}
   </div>
@@ -158,18 +180,18 @@
   .who,
   .line {
     background: #000;
-    padding: 0.6cqi 2.2cqi;
+    padding: 0.2em 0.5em;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
   }
   .who {
-    font-size: 4.4cqi;
+    font-size: max(4.4cqi, 11px);
     font-weight: 700;
     color: #f2c230;
     letter-spacing: 0.02em;
   }
   .line {
-    font-size: 7.4cqi;
+    font-size: max(7.4cqi, 13px);
     font-weight: 800;
     line-height: 1.32;
     color: #fff;
